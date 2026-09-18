@@ -1,0 +1,36 @@
+import { createClient } from "@/lib/supabase/server";
+import { listTokens } from "@/lib/actions/tokens";
+import { ProfileForm } from "@/components/settings/ProfileForm";
+import { TokenManager } from "@/components/settings/TokenManager";
+import { Separator } from "@/components/ui/separator";
+
+export default async function SettingsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const tokens = await listTokens();
+
+  return (
+    <div className="mx-auto max-w-xl space-y-8">
+      <div>
+        <h1 className="text-xl font-semibold">Settings</h1>
+      </div>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Profile</h2>
+        {profile && <ProfileForm profile={profile} />}
+      </section>
+
+      <Separator />
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Browser extension</h2>
+        <TokenManager initialTokens={tokens} />
+      </section>
+    </div>
+  );
+}
