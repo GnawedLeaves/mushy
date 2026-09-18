@@ -49,8 +49,13 @@ interface TextPressureProps {
 
 export function TextPressure({
   text = "Compressa",
-  fontFamily = "Roboto Flex",
-  fontUrl = "https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap",
+  // Self-hosted via next/font (see app/layout.tsx) rather than the
+  // reactbits original's runtime Google Fonts @import, which is one more
+  // network round-trip that can lose the race and fall back to the
+  // browser's default serif. Pass `fontUrl` explicitly to opt back into a
+  // runtime @import for a different font.
+  fontFamily = "var(--font-roboto-flex), ui-sans-serif, sans-serif",
+  fontUrl = "",
   width = true,
   weight = true,
   italic = true,
@@ -178,7 +183,7 @@ export function TextPressure({
   const styleElement = useMemo(
     () => (
       <style>{`
-        @import url('${fontUrl}');
+        ${fontUrl ? `@import url('${fontUrl}');` : ""}
         .text-pressure-flex { display: flex; justify-content: space-between; }
         .text-pressure-stroke span { position: relative; color: ${textColor}; }
         .text-pressure-stroke span::after {

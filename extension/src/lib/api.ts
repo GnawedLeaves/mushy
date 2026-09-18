@@ -42,9 +42,19 @@ export async function testConnection(apiBase: string, token: string): Promise<{ 
     const response = await fetch(`${apiBase}/api/extension/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (!response.ok) {
-      return { ok: false, error: "Invalid token." };
+      if (response.status === 401) return { ok: false, error: "Invalid or revoked token." };
+      // A 500 here almost always means the web app's own Supabase setup is
+      // incomplete (e.g. SUPABASE_SERVICE_ROLE_KEY missing) -- not a bad
+      // token. Surface the server's own message when it sent one.
+      const body = await response.json().catch(() => ({}));
+      return {
+        ok: false,
+        error: body.error ?? `Server error (${response.status}). Check the web app's server logs.`,
+      };
     }
+
     const data = await response.json();
     return { ok: true, username: data.username ?? null };
   } catch {

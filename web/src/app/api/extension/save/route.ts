@@ -12,7 +12,16 @@ interface SavePayload {
 }
 
 export async function POST(request: Request) {
-  const auth = await verifyExtensionToken(request);
+  let auth;
+  try {
+    auth = await verifyExtensionToken(request);
+  } catch (err) {
+    // e.g. SUPABASE_SERVICE_ROLE_KEY missing -- a server misconfiguration,
+    // not a bad token, so this must not look like a 401 to the extension.
+    const message = err instanceof Error ? err.message : "Unknown server error.";
+    return NextResponse.json({ error: `Server misconfigured: ${message}` }, { status: 500 });
+  }
+
   if (!auth) {
     return NextResponse.json({ error: "Invalid or revoked token." }, { status: 401 });
   }
