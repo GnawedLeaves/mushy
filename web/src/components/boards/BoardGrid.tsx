@@ -17,7 +17,15 @@ import { reorderSaveInBoard } from "@/lib/actions/board-saves";
 import { BoardSaveCard } from "@/components/boards/BoardSaveCard";
 import type { SaveWithUrl } from "@/lib/types";
 
-function SortableBoardCard({ boardId, save }: { boardId: string; save: SaveWithUrl }) {
+function SortableBoardCard({
+  boardId,
+  save,
+  onRemoved,
+}: {
+  boardId: string;
+  save: SaveWithUrl;
+  onRemoved: () => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: save.id });
 
   return (
@@ -34,7 +42,7 @@ function SortableBoardCard({ boardId, save }: { boardId: string; save: SaveWithU
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      <BoardSaveCard boardId={boardId} save={save} />
+      <BoardSaveCard boardId={boardId} save={save} onRemoved={onRemoved} />
     </div>
   );
 }
@@ -46,11 +54,15 @@ export function BoardGrid({ boardId, saves, editable }: { boardId: string; saves
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  function handleRemoved(saveId: string) {
+    setOrdered((prev) => prev.filter((s) => s.id !== saveId));
+  }
+
   if (!editable) {
     return (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {saves.map((save) => (
-          <BoardSaveCard key={save.id} boardId={boardId} save={save} />
+          <BoardSaveCard key={save.id} boardId={boardId} save={save} canRemove={false} />
         ))}
       </div>
     );
@@ -71,11 +83,22 @@ export function BoardGrid({ boardId, saves, editable }: { boardId: string; saves
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    // A static `id` sidesteps a real SSR hydration mismatch: dnd-kit's
+    // default auto-generated id is a module-level counter that keeps
+    // incrementing across every DndContext mounted so far in the client
+    // session (e.g. visiting the gallery's "My order" view first), while
+    // each server render starts that counter fresh at 0 -- so the
+    // aria-describedby id it renders can legitimately differ next time.
+    <DndContext id={`board-${boardId}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ordered.map((s) => s.id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {ordered.map((save) => (
-            <SortableBoardCard key={save.id} boardId={boardId} save={save} />
+            <SortableBoardCard
+              key={save.id}
+              boardId={boardId}
+              save={save}
+              onRemoved={() => handleRemoved(save.id)}
+            />
           ))}
         </div>
       </SortableContext>

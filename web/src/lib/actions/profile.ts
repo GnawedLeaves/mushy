@@ -17,6 +17,12 @@ export async function updateProfile(formData: FormData) {
   if (!/^[a-z0-9_]{3,30}$/.test(username)) {
     return { error: "Username must be 3-30 characters: lowercase letters, numbers, underscores." };
   }
+  if (displayName.length > 50) {
+    return { error: "Display name must be 50 characters or fewer." };
+  }
+  if (bio.length > 280) {
+    return { error: "Bio must be 280 characters or fewer." };
+  }
 
   const { error } = await supabase
     .from("profiles")

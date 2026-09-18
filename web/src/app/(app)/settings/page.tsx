@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { listTokens } from "@/lib/actions/tokens";
+import { signOut } from "@/lib/actions/auth";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { TokenManager } from "@/components/settings/TokenManager";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -16,8 +18,9 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
-      <div>
+      <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Settings</h1>
+        <p className="text-sm text-muted-foreground">{user.email}</p>
       </div>
 
       <section className="space-y-4">
@@ -31,6 +34,17 @@ export default async function SettingsPage() {
         <h2 className="text-sm font-medium text-muted-foreground">Browser extension</h2>
         <TokenManager initialTokens={tokens} />
       </section>
+
+      <Separator />
+
+      {/* Also reachable here (not just the desktop header's nav) so it's
+          available on mobile, where the header nav is replaced by the
+          floating bottom bar. */}
+      <form action={signOut}>
+        <Button type="submit" variant="outline">
+          Log out
+        </Button>
+      </form>
     </div>
   );
 }

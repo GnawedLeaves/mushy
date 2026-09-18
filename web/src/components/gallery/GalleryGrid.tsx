@@ -66,7 +66,7 @@ export function GalleryGrid({ saves, boards }: { saves: SaveWithUrl[]; boards: B
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext id="gallery" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={orderedSaves.map((s) => s.id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {orderedSaves.map((save) => (

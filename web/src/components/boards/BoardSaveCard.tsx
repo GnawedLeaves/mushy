@@ -9,10 +9,24 @@ import { removeSaveFromBoard } from "@/lib/actions/board-saves";
 import { MediaThumb } from "@/components/gallery/MediaThumb";
 import type { SaveWithUrl } from "@/lib/types";
 
-export function BoardSaveCard({ boardId, save }: { boardId: string; save: SaveWithUrl }) {
+export function BoardSaveCard({
+  boardId,
+  save,
+  canRemove = true,
+  onRemoved,
+}: {
+  boardId: string;
+  save: SaveWithUrl;
+  canRemove?: boolean;
+  onRemoved?: () => void;
+}) {
   const [pending, startTransition] = useTransition();
 
   function handleRemove() {
+    // Optimistic: the parent grid drops this card from its list immediately
+    // rather than waiting on a router refresh, which a Client Component's
+    // own local state doesn't pick up on its own.
+    onRemoved?.();
     startTransition(async () => {
       try {
         await removeSaveFromBoard(boardId, save.id);
@@ -49,14 +63,16 @@ export function BoardSaveCard({ boardId, save }: { boardId: string; save: SaveWi
           >
             <ExternalLink className="h-3 w-3" />
           </a>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-7 w-7 bg-black/60 text-white hover:bg-black/80"
-            onClick={handleRemove}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {canRemove && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="h-7 w-7 bg-black/60 text-white hover:bg-black/80"
+              onClick={handleRemove}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
       {save.caption && <p className="truncate p-2 text-sm text-muted-foreground">{save.caption}</p>}

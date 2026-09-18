@@ -154,9 +154,21 @@ export function SaveCard({
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           onBlur={saveCaption}
+          onKeyDown={(e) => {
+            // Captions are single-line: Enter commits instead of inserting a
+            // newline. Without this, a fixed rows={1} textarea grows a
+            // vertical scrollbar the instant a newline lands (the "black
+            // bar" glitch), and the save only fires later on blur, so it
+            // looked like it "sometimes" saved depending on what the user
+            // did next.
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
           placeholder="Add a caption..."
           rows={1}
-          className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="w-full resize-none overflow-hidden bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>
 
