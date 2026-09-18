@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMediaUrl } from "@/lib/media";
 import { CreateBoardDialog } from "@/components/boards/CreateBoardDialog";
-import { Lock } from "lucide-react";
+import { BoardsGrid, type BoardTile } from "@/components/boards/BoardsGrid";
+import { LayoutGrid } from "lucide-react";
 
 export default async function BoardsPage() {
   const supabase = await createClient();
@@ -32,6 +32,13 @@ export default async function BoardsPage() {
     })
   );
 
+  const tiles: BoardTile[] = (boards ?? []).map((board, i) => ({
+    id: board.id,
+    title: board.title,
+    is_private: board.is_private,
+    cover: covers[i],
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -39,33 +46,13 @@ export default async function BoardsPage() {
         <CreateBoardDialog />
       </div>
 
-      {!boards || boards.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-24 text-center text-muted-foreground">
+      {tiles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-24 text-center text-muted-foreground">
+          <LayoutGrid className="h-6 w-6" />
           <p className="text-sm">No boards yet. Create one to start grouping your saves.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {boards.map((board, i) => (
-            <Link
-              key={board.id}
-              href={`/boards/${board.id}`}
-              className="group overflow-hidden rounded-lg border bg-card"
-            >
-              <div className="relative aspect-square bg-muted">
-                {covers[i] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={covers[i]!} alt="" className="h-full w-full object-cover" />
-                )}
-                {board.is_private && (
-                  <Lock className="absolute right-2 top-2 h-4 w-4 text-white drop-shadow" />
-                )}
-              </div>
-              <div className="p-2">
-                <p className="truncate text-sm font-medium">{board.title}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <BoardsGrid boards={tiles} />
       )}
     </div>
   );

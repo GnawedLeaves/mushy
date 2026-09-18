@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { Lock } from "lucide-react";
+import { Lock, Images } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMediaUrls } from "@/lib/media";
+import { AmbientGradient } from "@/components/fx/AmbientGradient";
+import { PublicProfileGrid } from "@/components/profile/PublicProfileGrid";
 import type { SaveWithUrl } from "@/lib/types";
 
 export default async function PublicProfilePage({
@@ -20,7 +22,8 @@ export default async function PublicProfilePage({
 
   if (!profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
+      <main className="relative flex min-h-screen items-center justify-center p-4">
+        <AmbientGradient />
         <p className="text-muted-foreground">This profile doesn&apos;t exist, or is private.</p>
       </main>
     );
@@ -45,58 +48,58 @@ export default async function PublicProfilePage({
   const urlMap = await getSignedMediaUrls((saves ?? []).map((s) => s.storage_path));
   const savesWithUrls: SaveWithUrl[] = (saves ?? []).map((s) => ({ ...s, mediaUrl: urlMap[s.storage_path] ?? null }));
 
+  const initial = (profile.display_name || profile.username).slice(0, 1).toUpperCase();
+
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{profile.display_name || `@${profile.username}`}</h1>
-          <p className="text-sm text-muted-foreground">@{profile.username}</p>
-          {profile.bio && <p className="mt-2 max-w-md text-sm">{profile.bio}</p>}
+    <main className="relative min-h-screen">
+      <AmbientGradient />
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="mb-10 flex items-start justify-between gap-4 rounded-2xl border bg-card/80 p-6 shadow-sm backdrop-blur-md">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
+              {initial}
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold">{profile.display_name || `@${profile.username}`}</h1>
+              <p className="text-sm text-muted-foreground">@{profile.username}</p>
+              {profile.bio && <p className="mt-2 max-w-md text-sm">{profile.bio}</p>}
+            </div>
+          </div>
+          <Link href={isOwner ? "/" : "/login"} className="whitespace-nowrap text-sm text-muted-foreground hover:text-foreground">
+            {isOwner ? "Back to your gallery" : "Log in"}
+          </Link>
         </div>
-        <Link href={isOwner ? "/" : "/login"} className="text-sm text-muted-foreground hover:text-foreground">
-          {isOwner ? "Back to your gallery" : "Log in"}
-        </Link>
-      </div>
 
-      {boards && boards.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Boards</h2>
-          <div className="flex flex-wrap gap-2">
-            {boards.map((board) => (
-              <Link
-                key={board.id}
-                href={`/boards/${board.id}`}
-                className="flex items-center gap-1 rounded-full border px-3 py-1 text-sm hover:bg-muted"
-              >
-                {board.is_private && <Lock className="h-3 w-3" />}
-                {board.title}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Saves</h2>
-        {savesWithUrls.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing public here yet.</p>
-        ) : (
-          <div className="columns-2 gap-4 sm:columns-3 lg:columns-4">
-            {savesWithUrls.map((save) => (
-              <div key={save.id} className="mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card">
-                {save.mediaUrl &&
-                  (save.media_type === "video" ? (
-                    <video src={save.mediaUrl} className="w-full" muted loop playsInline />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={save.mediaUrl} alt={save.caption ?? ""} className="w-full" loading="lazy" />
-                  ))}
-                {save.caption && <p className="p-2 text-sm text-muted-foreground">{save.caption}</p>}
-              </div>
-            ))}
-          </div>
+        {boards && boards.length > 0 && (
+          <section className="mb-8">
+            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Boards</h2>
+            <div className="flex flex-wrap gap-2">
+              {boards.map((board) => (
+                <Link
+                  key={board.id}
+                  href={`/boards/${board.id}`}
+                  className="flex items-center gap-1 rounded-full border bg-card/80 px-3 py-1 text-sm shadow-sm backdrop-blur-md hover:bg-muted"
+                >
+                  {board.is_private && <Lock className="h-3 w-3" />}
+                  {board.title}
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
-      </section>
+
+        <section>
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Saves</h2>
+          {savesWithUrls.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-24 text-center text-muted-foreground">
+              <Images className="h-6 w-6" />
+              <p className="text-sm">Nothing public here yet.</p>
+            </div>
+          ) : (
+            <PublicProfileGrid saves={savesWithUrls} />
+          )}
+        </section>
+      </div>
     </main>
   );
 }

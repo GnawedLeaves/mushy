@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMediaUrls } from "@/lib/media";
 import { loadMoreSaves } from "@/lib/actions/gallery";
@@ -78,8 +79,9 @@ export default async function GalleryPage({
 
 function EmptyGallery() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-24 text-center text-muted-foreground">
-      <p className="text-sm">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-24 text-center text-muted-foreground">
+      <Sparkles className="h-6 w-6" />
+      <p className="max-w-sm text-sm">
         Nothing saved yet. Install the browser extension and right-click any image, gif, or video to send it
         here.
       </p>

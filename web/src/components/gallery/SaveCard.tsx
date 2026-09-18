@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deleteSave, setSavePrivacy, updateCaption } from "@/lib/actions/saves";
 import { addSaveToBoard } from "@/lib/actions/board-saves";
+import { MediaThumb } from "@/components/gallery/MediaThumb";
 import type { BoardSummary, SaveWithUrl } from "@/lib/types";
 
 export function SaveCard({
@@ -78,40 +79,25 @@ export function SaveCard({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: pending ? 0.6 : 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.96, y: 12 }}
+      animate={{ opacity: pending ? 0.6 : 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -3 }}
       transition={{ duration: 0.18 }}
-      className="group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card"
+      className="group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-lg"
     >
       <div className="relative">
-        {save.mediaUrl ? (
-          save.media_type === "video" ? (
-            <video
-              src={save.mediaUrl}
-              className="w-full"
-              style={save.width && save.height ? { aspectRatio: `${save.width} / ${save.height}` } : undefined}
-              muted
-              loop
-              playsInline
-              onMouseEnter={(e) => e.currentTarget.play()}
-              onMouseLeave={(e) => e.currentTarget.pause()}
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={save.mediaUrl}
-              alt={save.caption ?? "Saved design"}
-              className="w-full"
-              style={save.width && save.height ? { aspectRatio: `${save.width} / ${save.height}` } : undefined}
-              loading="lazy"
-            />
-          )
-        ) : (
-          <div className="flex aspect-square items-center justify-center bg-muted text-xs text-muted-foreground">
-            Media unavailable
-          </div>
-        )}
+        <MediaThumb
+          mediaUrl={save.mediaUrl}
+          mediaType={save.media_type}
+          alt={save.caption ?? "Saved design"}
+          width={save.width}
+          height={save.height}
+          videoProps={{
+            onMouseEnter: (e) => e.currentTarget.play(),
+            onMouseLeave: (e) => e.currentTarget.pause(),
+          }}
+        />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
           <a

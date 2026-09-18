@@ -6,6 +6,7 @@ import { ExternalLink, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { removeSaveFromBoard } from "@/lib/actions/board-saves";
+import { MediaThumb } from "@/components/gallery/MediaThumb";
 import type { SaveWithUrl } from "@/lib/types";
 
 export function BoardSaveCard({ boardId, save }: { boardId: string; save: SaveWithUrl }) {
@@ -24,20 +25,20 @@ export function BoardSaveCard({ boardId, save }: { boardId: string; save: SaveWi
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: pending ? 0.6 : 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.96, y: 12 }}
+      animate={{ opacity: pending ? 0.6 : 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -3 }}
       transition={{ duration: 0.18 }}
-      className="group relative overflow-hidden rounded-lg border bg-card"
+      className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-square bg-muted">
-        {save.mediaUrl &&
-          (save.media_type === "video" ? (
-            <video src={save.mediaUrl} className="h-full w-full object-cover" muted loop playsInline />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={save.mediaUrl} alt={save.caption ?? ""} className="h-full w-full object-cover" loading="lazy" />
-          ))}
+        <MediaThumb
+          mediaUrl={save.mediaUrl}
+          mediaType={save.media_type}
+          alt={save.caption ?? ""}
+          className="h-full w-full object-cover"
+        />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
           <a

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto_Flex } from "next/font/google";
+import { Space_Grotesk, Geist_Mono, Roboto_Flex } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// The app's global body/UI font. Swap this for a different next/font/google
+// call (or next/font/local for a self-hosted file) whenever you land on a
+// look you like -- just keep the `variable: "--font-space-grotesk"` name in
+// sync with globals.css's `--font-sans: var(--font-space-grotesk)`, or
+// rename both together.
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
+  weight: "variable",
 });
 
 const geistMono = Geist_Mono({
@@ -34,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${robotoFlex.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${geistMono.variable} ${robotoFlex.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}
