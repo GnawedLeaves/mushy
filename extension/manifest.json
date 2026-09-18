@@ -3,7 +3,7 @@
   "name": "Mushy",
   "version": "0.1.0",
   "description": "Right-click any image, gif, or video to save it to your Mushy gallery.",
-  "permissions": ["contextMenus", "storage", "notifications"],
+  "permissions": ["contextMenus", "storage", "notifications", "scripting"],
   "host_permissions": ["https://mushy-six.vercel.app/*", "http://localhost:3000/*"],
   "icons": {
     "16": "icons/icon16.png",

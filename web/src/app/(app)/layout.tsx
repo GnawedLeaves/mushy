@@ -41,22 +41,30 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="w-48">
           <UserSearch />
         </div>
-        {username && (
-          <Link href={`/u/${username}`} className="text-muted-foreground hover:text-foreground">
-            @{username}
-          </Link>
-        )}
         <Link href="/help" className="text-muted-foreground hover:text-foreground">
           Help
         </Link>
-        <Link href="/settings" className="text-muted-foreground hover:text-foreground">
-          Settings
-        </Link>
-        <form action={signOut}>
-          <Button type="submit" variant="ghost" size="sm">
-            Log out
-          </Button>
-        </form>
+        {user ? (
+          <>
+            {username && (
+              <Link href={`/u/${username}`} className="text-muted-foreground hover:text-foreground">
+                @{username}
+              </Link>
+            )}
+            <Link href="/settings" className="text-muted-foreground hover:text-foreground">
+              Settings
+            </Link>
+            <form action={signOut}>
+              <Button type="submit" variant="ghost" size="sm">
+                Log out
+              </Button>
+            </form>
+          </>
+        ) : (
+          <Link href="/login" className="text-muted-foreground hover:text-foreground">
+            Log in
+          </Link>
+        )}
       </div>
     </>
   );
