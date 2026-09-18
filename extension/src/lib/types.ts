@@ -7,7 +7,7 @@ export interface SavePayload {
   sourceTitle?: string;
 }
 
-export const DEFAULT_API_BASE = "http://localhost:3000";
+export const DEFAULT_API_BASE = "https://mushy-six.vercel.app";
 
 export interface ExtensionSettings {
   apiBase: string;

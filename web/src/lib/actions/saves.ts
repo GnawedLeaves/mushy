@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { positionBetween } from "@/lib/reorder";
+import { SAVE_CAPTION_MAX } from "@/lib/limits";
 
 export async function updateCaption(saveId: string, caption: string) {
   const supabase = await createClient();
@@ -11,12 +12,14 @@ export async function updateCaption(saveId: string, caption: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const trimmed = caption.trim().slice(0, SAVE_CAPTION_MAX);
+
   // Ownership is enforced by RLS ("saves: write own"), but filtering by
   // owner_id here too means a stray ID for someone else's save fails
   // silently (0 rows updated) instead of relying on RLS alone.
   const { error } = await supabase
     .from("saves")
-    .update({ caption: caption.trim() || null })
+    .update({ caption: trimmed || null })
     .eq("id", saveId)
     .eq("owner_id", user.id);
 

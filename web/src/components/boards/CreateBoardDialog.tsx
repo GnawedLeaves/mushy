@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createBoard } from "@/lib/actions/boards";
+import { BOARD_TITLE_MAX, BOARD_DESCRIPTION_MAX } from "@/lib/limits";
 
 export function CreateBoardDialog() {
   const [open, setOpen] = useState(false);
@@ -42,11 +43,11 @@ export function CreateBoardDialog() {
         <form action={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" required autoFocus />
+            <Input id="title" name="title" required autoFocus maxLength={BOARD_TITLE_MAX} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Description (optional)</Label>
-            <Textarea id="description" name="description" rows={3} />
+            <Textarea id="description" name="description" rows={3} maxLength={BOARD_DESCRIPTION_MAX} />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>

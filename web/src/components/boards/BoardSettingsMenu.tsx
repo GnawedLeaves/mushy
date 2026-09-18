@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteBoard, setBoardPrivacy, updateBoard } from "@/lib/actions/boards";
+import { BOARD_TITLE_MAX, BOARD_DESCRIPTION_MAX } from "@/lib/limits";
 import type { BoardRow } from "@/lib/types";
 
 export function BoardSettingsMenu({ board }: { board: BoardRow }) {
@@ -83,11 +84,17 @@ export function BoardSettingsMenu({ board }: { board: BoardRow }) {
           <form action={handleUpdate} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" defaultValue={board.title} required />
+              <Input id="title" name="title" defaultValue={board.title} required maxLength={BOARD_TITLE_MAX} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" defaultValue={board.description ?? ""} rows={3} />
+              <Textarea
+                id="description"
+                name="description"
+                defaultValue={board.description ?? ""}
+                rows={3}
+                maxLength={BOARD_DESCRIPTION_MAX}
+              />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>

@@ -46,6 +46,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             @{username}
           </Link>
         )}
+        <Link href="/help" className="text-muted-foreground hover:text-foreground">
+          Help
+        </Link>
         <Link href="/settings" className="text-muted-foreground hover:text-foreground">
           Settings
         </Link>

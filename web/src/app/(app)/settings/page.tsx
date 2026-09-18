@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listTokens } from "@/lib/actions/tokens";
 import { signOut } from "@/lib/actions/auth";
@@ -24,14 +26,34 @@ export default async function SettingsPage() {
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Profile</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">Profile</h2>
+          {profile && (
+            // Mobile has no header nav (the floating bottom bar is icon-only
+            // and doesn't have room for a profile tab), so this is the way
+            // in to your own public profile there.
+            <Link
+              href={`/u/${profile.username}`}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              View your profile
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          )}
+        </div>
         {profile && <ProfileForm profile={profile} />}
       </section>
 
       <Separator />
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Browser extension</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">Browser extension</h2>
+          <Link href="/help" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            Help installing it
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
         <TokenManager initialTokens={tokens} />
       </section>
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { signInWithPassword } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GradientBackground } from "@/components/fx/GradientBackground";
@@ -36,9 +36,9 @@ export default async function LoginPage({
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required minLength={6} autoComplete="current-password" />
           </div>
-          <Button type="submit" className="w-full">
+          <SubmitButton className="w-full" pendingText="Logging in...">
             Log in
-          </Button>
+          </SubmitButton>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">

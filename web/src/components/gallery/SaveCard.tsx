@@ -18,6 +18,7 @@ import {
 import { deleteSave, setSavePrivacy, updateCaption } from "@/lib/actions/saves";
 import { addSaveToBoard } from "@/lib/actions/board-saves";
 import { MediaThumb } from "@/components/gallery/MediaThumb";
+import { SAVE_CAPTION_MAX } from "@/lib/limits";
 import type { BoardSummary, SaveWithUrl } from "@/lib/types";
 
 export function SaveCard({
@@ -168,6 +169,7 @@ export function SaveCard({
           }}
           placeholder="Add a caption..."
           rows={1}
+          maxLength={SAVE_CAPTION_MAX}
           className="w-full resize-none overflow-hidden bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>

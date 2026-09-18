@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { USERNAME_MAX, DISPLAY_NAME_MAX, BIO_MAX } from "@/lib/limits";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -14,14 +15,14 @@ export async function updateProfile(formData: FormData) {
   const displayName = String(formData.get("displayName") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
 
-  if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-    return { error: "Username must be 3-30 characters: lowercase letters, numbers, underscores." };
+  if (!new RegExp(`^[a-z0-9_]{3,${USERNAME_MAX}}$`).test(username)) {
+    return { error: `Username must be 3-${USERNAME_MAX} characters: lowercase letters, numbers, underscores.` };
   }
-  if (displayName.length > 50) {
-    return { error: "Display name must be 50 characters or fewer." };
+  if (displayName.length > DISPLAY_NAME_MAX) {
+    return { error: `Display name must be ${DISPLAY_NAME_MAX} characters or fewer.` };
   }
-  if (bio.length > 280) {
-    return { error: "Bio must be 280 characters or fewer." };
+  if (bio.length > BIO_MAX) {
+    return { error: `Bio must be ${BIO_MAX} characters or fewer.` };
   }
 
   const { error } = await supabase

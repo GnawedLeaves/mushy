@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BOARD_TITLE_MAX, BOARD_DESCRIPTION_MAX } from "@/lib/limits";
 
 export async function createBoard(formData: FormData) {
   const supabase = await createClient();
@@ -13,8 +14,12 @@ export async function createBoard(formData: FormData) {
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Give the board a title." };
+  if (title.length > BOARD_TITLE_MAX) return { error: `Title must be ${BOARD_TITLE_MAX} characters or fewer.` };
 
   const description = String(formData.get("description") ?? "").trim();
+  if (description.length > BOARD_DESCRIPTION_MAX) {
+    return { error: `Description must be ${BOARD_DESCRIPTION_MAX} characters or fewer.` };
+  }
 
   const { data, error } = await supabase
     .from("boards")
@@ -38,6 +43,10 @@ export async function updateBoard(boardId: string, formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   if (!title) return { error: "Give the board a title." };
+  if (title.length > BOARD_TITLE_MAX) return { error: `Title must be ${BOARD_TITLE_MAX} characters or fewer.` };
+  if (description.length > BOARD_DESCRIPTION_MAX) {
+    return { error: `Description must be ${BOARD_DESCRIPTION_MAX} characters or fewer.` };
+  }
 
   const { error } = await supabase
     .from("boards")

@@ -7,13 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { updateProfile, setProfilePrivacy } from "@/lib/actions/profile";
+import { USERNAME_MAX, DISPLAY_NAME_MAX, BIO_MAX } from "@/lib/limits";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-
-const USERNAME_MAX = 30;
-const DISPLAY_NAME_MAX = 50;
-const BIO_MAX = 280;
 
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [error, setError] = useState<string | null>(null);

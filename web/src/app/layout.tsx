@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Geist_Mono, Roboto_Flex } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaRegister } from "@/components/fx/PwaRegister";
 import "./globals.css";
 
 // The app's global body/UI font. Swap this for a different next/font/google
@@ -34,6 +35,23 @@ const robotoFlex = Roboto_Flex({
 export const metadata: Metadata = {
   title: "Mushy",
   description: "Save tasteful designs, gifs, and clips -- and curate them into moodboards.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mushy",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#111111",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -45,6 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster />
+        <PwaRegister />
       </body>
     </html>
   );

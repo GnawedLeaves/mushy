@@ -9,8 +9,8 @@ export function AmbientGradient({ className = "" }: { className?: string }) {
       aria-hidden
       className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className}`}
     >
-      <div className="ambient-gradient-blob absolute -left-1/4 -top-1/4 h-[70vh] w-[70vh] rounded-full bg-[#f5d0e8] opacity-40 blur-3xl" />
-      <div className="ambient-gradient-blob-2 absolute -right-1/4 top-1/3 h-[60vh] w-[60vh] rounded-full bg-[#a9d8f7] opacity-40 blur-3xl" />
+      <div className="ambient-gradient-blob absolute -left-1/4 -top-1/4 h-[70vh] w-[70vh] rounded-full bg-[#f5d0e8] opacity-30 blur-3xl" />
+      <div className="ambient-gradient-blob-2 absolute -right-1/4 top-1/3 h-[60vh] w-[60vh] rounded-full bg-[#a9d8f7] opacity-30 blur-3xl" />
       <div className="ambient-gradient-blob-3 absolute bottom-[-20%] left-1/3 h-[55vh] w-[55vh] rounded-full bg-[#c7bff0] opacity-35 blur-3xl" />
       <style>{`
         @keyframes ambient-drift-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6%,4%) scale(1.08); } }
