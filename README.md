@@ -1,4 +1,4 @@
-# Mushy
+# Mushy Six
 
 Save tasteful designs, gifs, and clips from the browser -- with the source link kept -- and curate them into moodboards.
 
@@ -46,7 +46,7 @@ This produces `extension/dist` -- that's the folder you load into the browser. R
 2. Turn on **Developer mode** (top-right toggle).
 3. Click **Load unpacked**.
 4. Select the `mushy/extension/dist` folder (not `extension/` itself -- the built one).
-5. "Mushy" appears in your extensions list. To pin it to the toolbar for quick access: click the puzzle-piece icon in Chrome's toolbar → click the pin icon next to Mushy.
+5. "Mushy Six" appears in your extensions list. To pin it to the toolbar for quick access: click the puzzle-piece icon in Chrome's toolbar → click the pin icon next to Mushy Six.
 
 **Load it in Arc:**
 
@@ -59,20 +59,20 @@ Arc uses the same Chromium extensions system, so the steps are identical:
 
 **Connect it to your account:**
 
-1. Right-click the Mushy icon in your toolbar → **Options** (or go to `chrome://extensions`, find Mushy, click **Details** → **Extension options**).
+1. Right-click the Mushy Six icon in your toolbar → **Options** (or go to `chrome://extensions`, find Mushy Six, click **Details** → **Extension options**).
 2. Paste the personal access token you generated in the web app (Settings → Browser extension).
 3. Click **Save & test connection** -- it should show "Connected as @yourusername".
 
 **Use it:**
 
-Right-click any image, video, or a direct link to a `.gif`/`.mp4`/`.webm`/`.png`/`.jpg`/`.webp` file on any page → **Save to Mushy**. A notification confirms success or explains the failure (e.g. the site blocks hotlinking, or the file's too large).
+Right-click any image, video, or a direct link to a `.gif`/`.mp4`/`.webm`/`.png`/`.jpg`/`.webp` file on any page → **Save to Mushy Six**. A banner on the page and a notification both confirm success or explain the failure (e.g. the site blocks hotlinking, or the file's too large).
 
-**After changing the extension's code:** run `npm run build` again, then go to `chrome://extensions` and click the reload icon (↻) on the Mushy card -- no need to remove and re-add it.
+**After changing the extension's code:** run `npm run build` again (or `npm run package` to also refresh the downloadable zip), then go to `chrome://extensions` and click the reload icon (↻) on the Mushy Six card -- no need to remove and re-add it.
 
 **Troubleshooting:**
 - No context menu item? Make sure you're right-clicking directly on an `<img>`/`<video>` element or a link that ends in a supported extension -- right-clicking empty page background won't show it.
 - "No token set" notification → open the options page and connect a token (above).
-- "Could not reach Mushy" → the web app (`npm run dev` in `web/`) isn't running, or the options page's API base URL doesn't match where it's running (defaults to `http://localhost:3000`).
+- "Could not reach Mushy Six" → the web app (`npm run dev` in `web/`) isn't running, or the options page's API base URL doesn't match where it's running (defaults to `https://mushy-six.vercel.app`).
 
 ## Extension ↔ API contract
 

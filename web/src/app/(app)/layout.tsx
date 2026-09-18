@@ -25,7 +25,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     <>
       <nav className="flex items-center gap-5 text-sm">
         <Link href="/" className="font-semibold tracking-tight">
-          mushy
+          mushy six
         </Link>
         <Link href="/" className="text-muted-foreground hover:text-foreground">
           Gallery

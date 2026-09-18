@@ -33,7 +33,7 @@ export async function saveMedia(payload: SavePayload): Promise<{ ok: true } | { 
 
     return { ok: true };
   } catch {
-    return { ok: false, error: "Could not reach Mushy. Is the app running?" };
+    return { ok: false, error: "Could not reach Mushy Six. Is the app running?" };
   }
 }
 

@@ -1,4 +1,4 @@
-// Zips the built `dist/` folder into web/public/downloads/mushy-extension.zip
+// Zips the built `dist/` folder into web/public/downloads/mushy-six-extension.zip
 // so it's downloadable from the deployed site (linked from the help
 // center). Run via `npm run package` (builds first, then zips).
 import { execSync } from "node:child_process";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const extensionDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const distDir = join(extensionDir, "dist");
 const outDir = join(extensionDir, "..", "web", "public", "downloads");
-const outFile = join(outDir, "mushy-extension.zip");
+const outFile = join(outDir, "mushy-six-extension.zip");
 
 if (!existsSync(distDir)) {
   console.error(`dist/ not found at ${distDir} -- run \`npm run build\` first.`);

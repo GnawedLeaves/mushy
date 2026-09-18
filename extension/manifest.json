@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Mushy",
+  "name": "Mushy Six",
   "version": "0.1.0",
-  "description": "Right-click any image, gif, or video to save it to your Mushy gallery.",
+  "description": "Right-click any image, gif, or video to save it to your Mushy Six gallery.",
   "permissions": ["contextMenus", "storage", "notifications", "scripting"],
   "host_permissions": ["https://mushy-six.vercel.app/*", "http://localhost:3000/*"],
   "icons": {

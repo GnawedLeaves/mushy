@@ -16,8 +16,8 @@ export default async function LoginPage({
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-hidden p-4">
       <GradientBackground />
-      <div className="h-[110px] w-[280px]">
-        <TextPressure text="mushy" textColor="#111111" minFontSize={24} italic={false} />
+      <div className="h-[110px] w-[340px]">
+        <TextPressure text="mushy six" textColor="#111111" minFontSize={24} italic={false} />
       </div>
       <div className="w-full max-w-sm space-y-6 rounded-2xl bg-background/70 p-6 backdrop-blur-md">
         <p className="text-center text-sm text-muted-foreground">Log in to your gallery</p>

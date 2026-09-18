@@ -6,13 +6,13 @@ const MEDIA_LINK_PATTERNS = ["*://*/*.gif*", "*://*/*.png*", "*://*/*.jpg*", "*:
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "mushy-save-media",
-    title: "Save to Mushy",
+    title: "Save to Mushy Six",
     contexts: ["image", "video"],
   });
 
   chrome.contextMenus.create({
     id: "mushy-save-link",
-    title: "Save to Mushy",
+    title: "Save to Mushy Six",
     contexts: ["link"],
     targetUrlPatterns: MEDIA_LINK_PATTERNS,
   });
@@ -64,12 +64,12 @@ async function handleSave(mediaUrl: string, sourceUrl: string, sourceTitle?: str
   const result = await saveMedia(payload);
 
   const mediaType = mediaTypeFromUrl(mediaUrl);
-  const message = result.ok ? `${mediaType} saved to Mushy` : `Could not save: ${result.error}`;
+  const message = result.ok ? `${mediaType} saved to Mushy Six` : `Could not save: ${result.error}`;
 
   chrome.notifications.create({
     type: "basic",
     iconUrl: chrome.runtime.getURL("icons/icon128.png"),
-    title: result.ok ? "Saved to Mushy" : "Could not save",
+    title: result.ok ? "Saved to Mushy Six" : "Could not save",
     message: result.ok ? `${mediaType} saved -- open your gallery to see it.` : result.error,
   });
 

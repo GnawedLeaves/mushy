@@ -48,7 +48,7 @@ export function TokenManager({ initialTokens }: { initialTokens: TokenRow[] }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Paste a token into the Mushy browser extension&apos;s options page so it can save on your behalf.
+        Paste a token into the Mushy Six browser extension&apos;s options page so it can save on your behalf.
       </p>
 
       {freshToken && (

@@ -33,13 +33,13 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata: Metadata = {
-  title: "Mushy",
+  title: "Mushy Six",
   description: "Save tasteful designs, gifs, and clips -- and curate them into moodboards.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Mushy",
+    title: "Mushy Six",
   },
   icons: {
     icon: "/icons/icon-192.png",

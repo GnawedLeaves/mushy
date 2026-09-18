@@ -43,10 +43,10 @@ export default function HelpPage() {
           <Button
             className="gap-2"
             nativeButton={false}
-            render={<a href="/downloads/mushy-extension.zip" download />}
+            render={<a href="/downloads/mushy-six-extension.zip" download />}
           >
             <Download className="h-4 w-4" />
-            Download mushy-extension.zip
+            Download mushy-six-extension.zip
           </Button>
           <ol className="list-inside list-decimal space-y-2 text-sm text-muted-foreground">
             <li>Download the zip above and unzip it -- you&apos;ll get a folder containing a file called <code>manifest.json</code>.</li>
@@ -56,8 +56,8 @@ export default function HelpPage() {
             <li>Turn on <strong>Developer mode</strong> (top-right toggle).</li>
             <li>Click <strong>Load unpacked</strong> and select the unzipped folder.</li>
             <li>
-              &quot;Mushy&quot; appears in your extensions list. Pin it to the toolbar: click the puzzle-piece
-              icon in your browser toolbar, then click the pin next to Mushy.
+              &quot;Mushy Six&quot; appears in your extensions list. Pin it to the toolbar: click the
+              puzzle-piece icon in your browser toolbar, then click the pin next to Mushy Six.
             </li>
           </ol>
         </section>
@@ -65,12 +65,12 @@ export default function HelpPage() {
         <section id="token" className="space-y-3">
           <h2 className="text-lg font-semibold">2. Generate a personal access token</h2>
           <p className="text-sm text-muted-foreground">
-            The extension needs a token to know which Mushy account to save things to. You generate this
-            once and paste it into the extension.
+            The extension needs a token to know which Mushy Six account to save things to. You generate
+            this once and paste it into the extension.
           </p>
           <ol className="list-inside list-decimal space-y-2 text-sm text-muted-foreground">
             <li>
-              Log in at Mushy, then go to{" "}
+              Log in at Mushy Six, then go to{" "}
               <Link href="/settings" className="underline underline-offset-4 hover:text-foreground">
                 Settings
               </Link>
@@ -87,12 +87,12 @@ export default function HelpPage() {
         <section id="connect" className="space-y-3">
           <h2 className="text-lg font-semibold">3. Connect the extension</h2>
           <ol className="list-inside list-decimal space-y-2 text-sm text-muted-foreground">
-            <li>Right-click the Mushy icon in your toolbar and choose <strong>Options</strong>.</li>
+            <li>Right-click the Mushy Six icon in your toolbar and choose <strong>Options</strong>.</li>
             <li>
               Paste the token from step 2 into <strong>Personal access token</strong>. The{" "}
               <strong>API base URL</strong> field should already say{" "}
               <code>https://mushy-six.vercel.app</code> -- leave it as-is unless you&apos;re running your
-              own copy of Mushy locally.
+              own copy of Mushy Six locally.
             </li>
             <li>
               Click <strong>Save &amp; test connection</strong>. It should say &quot;Connected as
@@ -106,7 +106,7 @@ export default function HelpPage() {
           <p className="text-sm text-muted-foreground">
             Right-click any image, video, or a direct link to a <code>.gif</code>/<code>.mp4</code>/
             <code>.webm</code>/<code>.png</code>/<code>.jpg</code>/<code>.webp</code> file on any page, and
-            choose <strong>Save to Mushy</strong>. A banner on the page and a notification both confirm it
+            choose <strong>Save to Mushy Six</strong>. A banner on the page and a notification both confirm it
             worked, or explain why it didn&apos;t (e.g. the site blocks hotlinking, or the file&apos;s too
             large).
           </p>
@@ -130,7 +130,7 @@ export default function HelpPage() {
               actually running at that address.
             </li>
             <li>
-              <strong>&quot;Server misconfigured&quot;?</strong> That&apos;s on the Mushy server, not your
+              <strong>&quot;Server misconfigured&quot;?</strong> That&apos;s on the Mushy Six server, not your
               token -- try again later.
             </li>
           </ul>
