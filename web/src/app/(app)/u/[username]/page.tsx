@@ -1,9 +1,9 @@
-import Link from "next/link";
-import { Lock, Images } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getSignedMediaUrls } from "@/lib/media";
 import { PublicProfileGrid } from "@/components/profile/PublicProfileGrid";
+import { getSignedMediaUrls } from "@/lib/media";
+import { createClient } from "@/lib/supabase/server";
 import type { SaveWithUrl } from "@/lib/types";
+import { Images, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default async function PublicProfilePage({
   params,

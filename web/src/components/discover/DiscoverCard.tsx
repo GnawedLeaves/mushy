@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import Link from "next/link";
+import { MediaThumb } from "@/components/gallery/MediaThumb";
+import { Button } from "@/components/ui/button";
+import type { DiscoverSave } from "@/lib/actions/discover";
+import { repinSave } from "@/lib/actions/discover";
 import { motion } from "framer-motion";
 import { Check, ExternalLink, Plus } from "lucide-react";
+import Link from "next/link";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { MediaThumb } from "@/components/gallery/MediaThumb";
-import { repinSave } from "@/lib/actions/discover";
-import type { DiscoverSave } from "@/lib/actions/discover";
 
 export function DiscoverCard({ save }: { save: DiscoverSave }) {
   const [saved, setSaved] = useState(false);
@@ -67,7 +67,7 @@ export function DiscoverCard({ save }: { save: DiscoverSave }) {
           href={`/u/${save.owner.username}`}
           className="truncate text-xs text-muted-foreground hover:text-foreground"
         >
-          @{save.owner.username}
+          {save.owner.display_name || `@${save.owner.username}`}
         </Link>
       </div>
     </motion.div>
