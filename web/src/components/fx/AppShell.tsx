@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
+import Link from "next/link";
 import { AmbientGradient } from "@/components/fx/AmbientGradient";
 import { MobileNav } from "@/components/nav/MobileNav";
 
@@ -28,6 +29,15 @@ export function AppShell({ nav, children }: { nav: ReactNode; children: ReactNod
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:pb-6">{children}</main>
+
+      {/* Not in the main nav -- it's already packed (see the comment above)
+          -- but every page should still lead somewhere to it, both for
+          users and for the Chrome Web Store listing's linked site. */}
+      <footer className="hidden border-t px-4 py-4 text-center text-xs text-muted-foreground sm:block">
+        <Link href="/privacy" className="hover:text-foreground">
+          Privacy policy
+        </Link>
+      </footer>
 
       <MobileNav />
     </div>
