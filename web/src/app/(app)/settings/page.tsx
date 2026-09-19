@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { listTokens } from "@/lib/actions/tokens";
 import { signOut } from "@/lib/actions/auth";
 import { ProfileForm } from "@/components/settings/ProfileForm";
+import { AvatarUploadForm } from "@/components/settings/AvatarUploadForm";
 import { TokenManager } from "@/components/settings/TokenManager";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { getAvatarUrl } from "@/lib/media";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -17,6 +19,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
   const tokens = await listTokens();
+  const avatarUrl = profile ? await getAvatarUrl(profile.avatar_path, profile.updated_at) : null;
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
@@ -41,7 +44,12 @@ export default async function SettingsPage() {
             </Link>
           )}
         </div>
-        {profile && <ProfileForm profile={profile} />}
+        {profile && (
+          <>
+            <AvatarUploadForm initialAvatarUrl={avatarUrl} label={profile.display_name || profile.username} />
+            <ProfileForm profile={profile} />
+          </>
+        )}
       </section>
 
       <Separator />

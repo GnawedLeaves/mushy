@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { Loader2, MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteBoard, setBoardPrivacy, updateBoard } from "@/lib/actions/boards";
 import { BOARD_TITLE_MAX, BOARD_DESCRIPTION_MAX } from "@/lib/limits";
+import { isRedirectError } from "@/lib/isRedirectError";
 import type { BoardRow } from "@/lib/types";
 
 export function BoardSettingsMenu({ board }: { board: BoardRow }) {
@@ -30,6 +31,7 @@ export function BoardSettingsMenu({ board }: { board: BoardRow }) {
   const [isPrivate, setIsPrivate] = useState(board.is_private);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   function togglePrivacy(next: boolean) {
     setIsPrivate(next);
@@ -51,9 +53,23 @@ export function BoardSettingsMenu({ board }: { board: BoardRow }) {
     }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirm(`Delete "${board.title}"? Saves inside it are kept, just ungrouped.`)) return;
-    deleteBoard(board.id).catch(() => toast.error("Could not delete board."));
+    setDeleting(true);
+    try {
+      await deleteBoard(board.id);
+      // deleteBoard redirects on success -- redirect() throws internally, so
+      // reaching this line at all means it did NOT redirect, i.e. it
+      // returned normally without deleting. There's currently no such path,
+      // but if one's added later this keeps the pending state honest.
+    } catch (err) {
+      if (!isRedirectError(err)) {
+        setDeleting(false);
+        toast.error("Could not delete board.");
+      }
+      // A redirect error means success -- the navigation is already
+      // underway, so leave `deleting` true rather than flashing it back off.
+    }
   }
 
   return (
@@ -69,9 +85,9 @@ export function BoardSettingsMenu({ board }: { board: BoardRow }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setEditOpen(true)}>Edit board</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete board
+          <DropdownMenuItem onClick={handleDelete} disabled={deleting} className="text-destructive">
+            {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+            {deleting ? "Deleting..." : "Delete board"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

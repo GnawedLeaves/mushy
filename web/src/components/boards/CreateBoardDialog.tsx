@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createBoard } from "@/lib/actions/boards";
 import { BOARD_TITLE_MAX, BOARD_DESCRIPTION_MAX } from "@/lib/limits";
+import { isRedirectError } from "@/lib/isRedirectError";
 
 export function CreateBoardDialog() {
   const [open, setOpen] = useState(false);
@@ -25,9 +26,20 @@ export function CreateBoardDialog() {
   async function handleSubmit(formData: FormData) {
     setPending(true);
     setError(null);
-    const result = await createBoard(formData);
-    setPending(false);
-    if (result?.error) setError(result.error);
+    try {
+      const result = await createBoard(formData);
+      setPending(false);
+      if (result?.error) setError(result.error);
+    } catch (err) {
+      // createBoard redirects to the new board on success -- redirect()
+      // throws internally to signal navigation, so reaching this catch on
+      // success is expected. Only a genuine error should update state here;
+      // otherwise leave `pending` true while the navigation is in flight.
+      if (!isRedirectError(err)) {
+        setPending(false);
+        setError("Could not create board.");
+      }
+    }
   }
 
   return (

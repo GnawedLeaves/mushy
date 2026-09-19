@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +13,9 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
+const USERNAME_FORMAT_HINT = `3-${USERNAME_MAX} characters: lowercase letters, numbers, and underscores only.`;
+
 export function ProfileForm({ profile }: { profile: Profile }) {
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [pending, setPending] = useState(false);
   const [isPrivate, setIsPrivate] = useState(profile.is_private);
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
@@ -22,17 +23,18 @@ export function ProfileForm({ profile }: { profile: Profile }) {
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
-    setError(null);
-    setSaved(false);
     const result = await updateProfile(formData);
     setPending(false);
-    if (result?.error) setError(result.error);
-    else setSaved(true);
+    if (result?.error) toast.error(result.error);
+    else toast.success("Profile saved.");
   }
 
   function togglePrivacy(next: boolean) {
     setIsPrivate(next);
-    setProfilePrivacy(next).catch(() => setIsPrivate(!next));
+    setProfilePrivacy(next).catch(() => {
+      setIsPrivate(!next);
+      toast.error("Could not update privacy.");
+    });
   }
 
   return (
@@ -46,8 +48,13 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             defaultValue={profile.username}
             required
             pattern="[a-z0-9_]{3,30}"
+            title={USERNAME_FORMAT_HINT}
             maxLength={USERNAME_MAX}
           />
+          {/* Shown up front, not just on error -- the browser's native
+              "please match the requested format" bubble (from the pattern
+              attribute above) doesn't say what the format actually is. */}
+          <p className="text-xs text-muted-foreground">{USERNAME_FORMAT_HINT}</p>
         </div>
         <div className="space-y-2">
           <div className="flex items-baseline justify-between">
@@ -80,8 +87,6 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             maxLength={BIO_MAX}
           />
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        {saved && <p className="text-sm text-muted-foreground">Saved.</p>}
         <Button type="submit" disabled={pending}>
           {pending ? "Saving..." : "Save profile"}
         </Button>

@@ -4,6 +4,7 @@ import { signOut } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/fx/AppShell";
 import { UserSearch } from "@/components/search/UserSearch";
+import { NavLink } from "@/components/nav/NavLink";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const supabase = await createClient();
@@ -27,33 +28,25 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <Link href="/" className="font-semibold tracking-tight">
           mushy six
         </Link>
-        <Link href="/" className="text-muted-foreground hover:text-foreground">
+        <NavLink href="/" exact>
           Gallery
-        </Link>
-        <Link href="/discover" className="text-muted-foreground hover:text-foreground">
-          Discover
-        </Link>
-        <Link href="/boards" className="text-muted-foreground hover:text-foreground">
-          Boards
-        </Link>
+        </NavLink>
+        <NavLink href="/discover">Discover</NavLink>
+        <NavLink href="/boards">Boards</NavLink>
       </nav>
       <div className="flex items-center gap-3 text-sm">
         <div className="w-48">
           <UserSearch />
         </div>
-        <Link href="/help" className="text-muted-foreground hover:text-foreground">
-          Help
-        </Link>
+        <NavLink href="/help">Help</NavLink>
         {user ? (
           <>
             {username && (
-              <Link href={`/u/${username}`} className="text-muted-foreground hover:text-foreground">
+              <NavLink href={`/u/${username}`} exact>
                 @{username}
-              </Link>
+              </NavLink>
             )}
-            <Link href="/settings" className="text-muted-foreground hover:text-foreground">
-              Settings
-            </Link>
+            <NavLink href="/settings">Settings</NavLink>
             <form action={signOut}>
               <Button type="submit" variant="ghost" size="sm">
                 Log out

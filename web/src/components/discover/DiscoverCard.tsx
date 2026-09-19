@@ -33,13 +33,15 @@ export function DiscoverCard({ save }: { save: DiscoverSave }) {
       animate={{ opacity: 1, y: 0 }}
       className="group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-lg"
     >
-      <MediaThumb
-        mediaUrl={save.mediaUrl}
-        mediaType={save.media_type}
-        alt={save.caption ?? "Discovered design"}
-        width={save.width}
-        height={save.height}
-      />
+      <Link href={`/s/${save.id}`}>
+        <MediaThumb
+          mediaUrl={save.mediaUrl}
+          mediaType={save.media_type}
+          alt={save.caption ?? "Discovered design"}
+          width={save.width}
+          height={save.height}
+        />
+      </Link>
 
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
         <a

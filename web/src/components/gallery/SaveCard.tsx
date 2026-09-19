@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink, MoreVertical, Trash2, Lock, Unlock, FolderPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -88,17 +89,25 @@ export function SaveCard({
       className="group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-lg"
     >
       <div className="relative">
-        <MediaThumb
-          mediaUrl={save.mediaUrl}
-          mediaType={save.media_type}
-          alt={save.caption ?? "Saved design"}
-          width={save.width}
-          height={save.height}
-          videoProps={{
-            onMouseEnter: (e) => e.currentTarget.play(),
-            onMouseLeave: (e) => e.currentTarget.pause(),
-          }}
-        />
+        {/* The overlay buttons below are siblings of this Link, not
+            descendants -- nesting a <button> inside an <a> is invalid HTML
+            and would fire both the button's onClick and the Link's
+            navigation from one click. Keeping them separate (both
+            absolutely positioned within this same relative parent) lets
+            each capture its own clicks independently. */}
+        <Link href={`/s/${save.id}`}>
+          <MediaThumb
+            mediaUrl={save.mediaUrl}
+            mediaType={save.media_type}
+            alt={save.caption ?? "Saved design"}
+            width={save.width}
+            height={save.height}
+            videoProps={{
+              onMouseEnter: (e) => e.currentTarget.play(),
+              onMouseLeave: (e) => e.currentTarget.pause(),
+            }}
+          />
+        </Link>
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
           <a

@@ -1,5 +1,6 @@
 import { PublicProfileGrid } from "@/components/profile/PublicProfileGrid";
-import { getSignedMediaUrls } from "@/lib/media";
+import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { getAvatarUrl, getSignedMediaUrls } from "@/lib/media";
 import { createClient } from "@/lib/supabase/server";
 import type { SaveWithUrl } from "@/lib/types";
 import { Images, Lock } from "lucide-react";
@@ -41,16 +42,13 @@ export default async function PublicProfilePage({
 
   const urlMap = await getSignedMediaUrls((saves ?? []).map((s) => s.storage_path));
   const savesWithUrls: SaveWithUrl[] = (saves ?? []).map((s) => ({ ...s, mediaUrl: urlMap[s.storage_path] ?? null }));
-
-  const initial = (profile.display_name || profile.username).slice(0, 1).toUpperCase();
+  const avatarUrl = await getAvatarUrl(profile.avatar_path, profile.updated_at);
 
   return (
     <div>
       <div className="mb-10 flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-card/80 p-6 shadow-sm backdrop-blur-md">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
-            {initial}
-          </div>
+          <ProfileAvatar avatarUrl={avatarUrl} label={profile.display_name || profile.username} />
           <div>
             <h1 className="text-2xl font-semibold">{profile.display_name || `@${profile.username}`}</h1>
             <p className="text-sm text-muted-foreground">@{profile.username}</p>

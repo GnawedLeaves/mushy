@@ -1,0 +1,50 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import type { ReactionType } from "@/lib/supabase/database.types";
+
+export interface ReactionSummary {
+  likes: number;
+  dislikes: number;
+  myReaction: ReactionType | null;
+}
+
+export async function getSaveReactionSummary(saveId: string): Promise<ReactionSummary> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [{ count: likes }, { count: dislikes }, mine] = await Promise.all([
+    supabase.from("save_reactions").select("*", { count: "exact", head: true }).eq("save_id", saveId).eq("reaction", "like"),
+    supabase.from("save_reactions").select("*", { count: "exact", head: true }).eq("save_id", saveId).eq("reaction", "dislike"),
+    user
+      ? supabase.from("save_reactions").select("reaction").eq("save_id", saveId).eq("user_id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  return { likes: likes ?? 0, dislikes: dislikes ?? 0, myReaction: mine.data?.reaction ?? null };
+}
+
+// Pass `reaction: null` to clear your reaction (clicking an already-active
+// button toggles it off, handled by the caller).
+export async function setSaveReaction(saveId: string, reaction: ReactionType | null) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  if (reaction === null) {
+    const { error } = await supabase.from("save_reactions").delete().eq("save_id", saveId).eq("user_id", user.id);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("save_reactions")
+      .upsert({ save_id: saveId, user_id: user.id, reaction }, { onConflict: "save_id,user_id" });
+    if (error) throw new Error(error.message);
+  }
+
+  revalidatePath(`/s/${saveId}`);
+}

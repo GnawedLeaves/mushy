@@ -33,3 +33,18 @@ export async function getSignedMediaUrls(storagePaths: string[]): Promise<Record
   }
   return result;
 }
+
+// The "avatars" bucket is public, so no signing needed -- just the public
+// URL. `cacheBustKey` (pass the profile's `updated_at`) is appended as a
+// query param because avatars always upload to the same fixed storage key
+// (see uploadAvatar in lib/actions/profile.ts), so the URL itself never
+// changes when someone replaces their avatar; without a cache-buster the
+// browser (and any CDN in front of Storage) would keep serving the old
+// image indefinitely.
+export async function getAvatarUrl(avatarPath: string | null, cacheBustKey?: string | null): Promise<string | null> {
+  if (!avatarPath) return null;
+  const supabase = await createClient();
+  const { data } = supabase.storage.from("avatars").getPublicUrl(avatarPath);
+  if (!data.publicUrl) return null;
+  return cacheBustKey ? `${data.publicUrl}?v=${encodeURIComponent(cacheBustKey)}` : data.publicUrl;
+}

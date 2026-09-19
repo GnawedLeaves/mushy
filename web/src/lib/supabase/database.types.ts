@@ -12,6 +12,7 @@
 // type resolution breaks too.
 
 export type MediaType = "image" | "gif" | "video";
+export type ReactionType = "like" | "dislike";
 
 export interface Database {
   public: {
@@ -138,6 +139,92 @@ export interface Database {
             columns: ["save_id"];
             isOneToOne: false;
             referencedRelation: "saves";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      save_reactions: {
+        Row: {
+          save_id: string;
+          user_id: string;
+          reaction: ReactionType;
+          created_at: string;
+        };
+        Insert: {
+          save_id: string;
+          user_id: string;
+          reaction: ReactionType;
+        };
+        Update: Partial<{
+          reaction: ReactionType;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "save_reactions_save_id_fkey";
+            columns: ["save_id"];
+            isOneToOne: false;
+            referencedRelation: "saves";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      comments: {
+        Row: {
+          id: string;
+          save_id: string;
+          user_id: string;
+          parent_comment_id: string | null;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          save_id: string;
+          user_id: string;
+          parent_comment_id?: string | null;
+          body: string;
+        };
+        Update: Partial<{
+          body: string;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "comments_save_id_fkey";
+            columns: ["save_id"];
+            isOneToOne: false;
+            referencedRelation: "saves";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey";
+            columns: ["parent_comment_id"];
+            isOneToOne: false;
+            referencedRelation: "comments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      comment_reactions: {
+        Row: {
+          comment_id: string;
+          user_id: string;
+          reaction: ReactionType;
+          created_at: string;
+        };
+        Insert: {
+          comment_id: string;
+          user_id: string;
+          reaction: ReactionType;
+        };
+        Update: Partial<{
+          reaction: ReactionType;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "comments";
             referencedColumns: ["id"];
           },
         ];

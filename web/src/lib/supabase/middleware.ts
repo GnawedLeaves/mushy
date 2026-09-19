@@ -38,14 +38,24 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+    // Copy the refreshed-session cookies from supabaseResponse onto the
+    // redirect -- NextResponse.redirect() creates a brand new response
+    // object, so without this, any cookie Supabase just refreshed via
+    // getUser() (a new access token, on practically every request) is
+    // silently dropped whenever that request happens to also redirect.
+    // Over enough page loads this reads as "getting logged out constantly".
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   return supabaseResponse;

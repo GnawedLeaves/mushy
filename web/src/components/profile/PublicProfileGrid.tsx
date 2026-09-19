@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { MediaThumb } from "@/components/gallery/MediaThumb";
 import type { SaveWithUrl } from "@/lib/types";
@@ -28,13 +29,15 @@ export function PublicProfileGrid({ saves }: { saves: SaveWithUrl[] }) {
           variants={item}
           className="mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-card shadow-sm"
         >
-          <MediaThumb
-            mediaUrl={save.mediaUrl}
-            mediaType={save.media_type}
-            alt={save.caption ?? ""}
-            width={save.width}
-            height={save.height}
-          />
+          <Link href={`/s/${save.id}`}>
+            <MediaThumb
+              mediaUrl={save.mediaUrl}
+              mediaType={save.media_type}
+              alt={save.caption ?? ""}
+              width={save.width}
+              height={save.height}
+            />
+          </Link>
           {save.caption && <p className="p-2 text-sm text-muted-foreground">{save.caption}</p>}
         </motion.div>
       ))}

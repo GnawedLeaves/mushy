@@ -7,3 +7,4 @@ export const BIO_MAX = 280;
 export const BOARD_TITLE_MAX = 60;
 export const BOARD_DESCRIPTION_MAX = 300;
 export const SAVE_CAPTION_MAX = 200;
+export const COMMENT_MAX = 1000;

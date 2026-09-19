@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink, X } from "lucide-react";
 import { toast } from "sonner";
@@ -47,12 +48,14 @@ export function BoardSaveCard({
       className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-square bg-muted">
-        <MediaThumb
-          mediaUrl={save.mediaUrl}
-          mediaType={save.media_type}
-          alt={save.caption ?? ""}
-          className="h-full w-full object-cover"
-        />
+        <Link href={`/s/${save.id}`}>
+          <MediaThumb
+            mediaUrl={save.mediaUrl}
+            mediaType={save.media_type}
+            alt={save.caption ?? ""}
+            className="h-full w-full object-cover"
+          />
+        </Link>
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
           <a
