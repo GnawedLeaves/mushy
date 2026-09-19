@@ -40,6 +40,18 @@ export function MobileNav() {
 
   return (
     <>
+      {/* Floating top-right, separate from the bottom pill -- keeps
+          notifications reachable with a thumb-friendly top corner tap
+          instead of competing for space among the pill's other icons. */}
+      <Link
+        href="/notifications"
+        aria-label="Notifications"
+        className="fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border bg-card/90 text-muted-foreground shadow-lg backdrop-blur-md transition-colors hover:text-foreground sm:hidden"
+      >
+        <Bell className="h-5 w-5" />
+        {unread > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500" />}
+      </Link>
+
       <nav
         className="fixed inset-x-0 bottom-4 z-30 mx-auto flex w-fit items-center gap-1 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md sm:hidden"
         style={{ left: "50%", transform: "translateX(-50%)" }}
@@ -69,21 +81,6 @@ export function MobileNav() {
         >
           <Search className="h-5 w-5" />
         </button>
-
-        {/* Links to a full page rather than a positioned dropdown -- the
-            desktop header's NotificationBell dropdown has room to render
-            below it; this floating pill doesn't. */}
-        <Link
-          href="/notifications"
-          aria-label="Notifications"
-          className={cn(
-            "relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
-            pathname === "/notifications" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-          )}
-        >
-          <Bell className="h-5 w-5" />
-          {unread > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />}
-        </Link>
 
         <Link
           href="/settings"

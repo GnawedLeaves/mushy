@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HelpCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="w-48">
           <UserSearch />
         </div>
-        <NavLink href="/help">Help</NavLink>
+        <NavLink href="/help" aria-label="Help" title="Help" className="flex items-center">
+          <HelpCircle className="h-4.5 w-4.5" />
+        </NavLink>
         {user ? (
           <>
             <NotificationBell />

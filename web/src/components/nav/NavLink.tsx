@@ -9,12 +9,13 @@ export function NavLink({
   exact = false,
   className,
   children,
+  ...rest
 }: {
   href: string;
   exact?: boolean;
   className?: string;
   children: React.ReactNode;
-}) {
+} & Omit<React.ComponentProps<typeof Link>, "href" | "className" | "children">) {
   const pathname = useSectionPath();
   const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -27,6 +28,7 @@ export function NavLink({
         active ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
         className
       )}
+      {...rest}
     >
       {children}
     </Link>

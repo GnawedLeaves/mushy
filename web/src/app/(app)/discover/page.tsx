@@ -1,5 +1,5 @@
 import { DiscoverGrid } from "@/components/discover/DiscoverGrid";
-import { DomeGalleryDiscover } from "@/components/discover/DomeGalleryDiscover";
+import { DiscoverViewSwitcher } from "@/components/discover/DiscoverViewSwitcher";
 import { loadMoreDiscoverSaves } from "@/lib/actions/discover";
 import { Compass } from "lucide-react";
 
@@ -10,16 +10,16 @@ export default async function DiscoverPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Discover</h1>
 
-      {/* Desktop: reactbits' Dome Gallery, fetching its own paginated,
-          filterable, sortable pool client-side (see DomeGalleryDiscover).
-          Mobile keeps the existing masonry infinite-scroll grid below --
-          dragging to rotate a 3D dome doesn't translate well to touch
-          scrolling on a phone. Cutoff is `md` (768px), not `lg` (1024px) --
-          `lg` meant a lot of ordinary laptop-width browser windows (not
-          just narrow/tablet ones) fell back to the mobile grid and never
-          saw the dome at all. */}
+      {/* Desktop: a switcher between reactbits' Dome Gallery (default) and
+          the same masonry grid mobile uses, since dragging to rotate a 3D
+          dome isn't for everyone. Mobile always gets the masonry grid
+          directly, no switcher -- dragging to rotate the dome doesn't
+          translate to touch scrolling. Cutoff is `md` (768px), not `lg`
+          (1024px) -- `lg` meant a lot of ordinary laptop-width browser
+          windows (not just narrow/tablet ones) fell back to the mobile grid
+          and never saw the dome at all. */}
       <div className="hidden md:block">
-        <DomeGalleryDiscover />
+        <DiscoverViewSwitcher initialSaves={firstPage.saves} initialCursor={firstPage.nextCursor} />
       </div>
 
       <div className="md:hidden">
