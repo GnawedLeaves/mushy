@@ -14,6 +14,7 @@
 export type MediaType = "image" | "gif" | "video";
 export type ReactionType = "like" | "dislike";
 export type NotificationType = "save_like" | "comment";
+export type ThemePreference = "light" | "dark" | "system";
 
 export interface Database {
   public: {
@@ -26,6 +27,7 @@ export interface Database {
           bio: string | null;
           avatar_path: string | null;
           is_private: boolean;
+          theme: ThemePreference;
           created_at: string;
           updated_at: string;
         };
@@ -36,6 +38,7 @@ export interface Database {
           bio?: string | null;
           avatar_path?: string | null;
           is_private?: boolean;
+          theme?: ThemePreference;
         };
         Update: Partial<{
           username: string;
@@ -43,6 +46,7 @@ export interface Database {
           bio: string | null;
           avatar_path: string | null;
           is_private: boolean;
+          theme: ThemePreference;
         }>;
         Relationships: [];
       };

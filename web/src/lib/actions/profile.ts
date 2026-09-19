@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { USERNAME_MAX, DISPLAY_NAME_MAX, BIO_MAX } from "@/lib/limits";
+import type { ThemePreference } from "@/lib/supabase/database.types";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -108,4 +109,19 @@ export async function setProfilePrivacy(isPrivate: boolean) {
 
   revalidatePath("/settings");
   revalidatePath("/");
+}
+
+// Best-effort, fire-and-forget from the toggle (see ThemeToggle.tsx) -- the
+// theme has already applied instantly via next-themes' own localStorage
+// write, so a failure here just means this one browser's choice won't have
+// followed the account to a different device next time; nothing visible to
+// retry or surface an error for.
+export async function setThemePreference(theme: ThemePreference) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("profiles").update({ theme }).eq("id", user.id);
 }

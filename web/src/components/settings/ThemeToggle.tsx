@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "lucide-react";
+import { setThemePreference } from "@/lib/actions/profile";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [
@@ -26,6 +27,18 @@ export function ThemeToggle() {
     queueMicrotask(() => setMounted(true));
   }, []);
 
+  function handleSelect(value: (typeof OPTIONS)[number]["value"]) {
+    // next-themes applies it instantly (updates the class + this browser's
+    // localStorage on its own); the DB write alongside it is what lets a
+    // different device pick up the same choice later -- see
+    // ThemeProvider.tsx for how that gets read back on the next login.
+    setTheme(value);
+    setThemePreference(value).catch(() => {
+      // Best-effort -- the theme has already applied either way, so a
+      // failed sync just means it stays this-browser-only for now.
+    });
+  }
+
   return (
     <div className="flex gap-1 rounded-md border p-1 text-sm">
       {OPTIONS.map((opt) => {
@@ -35,7 +48,7 @@ export function ThemeToggle() {
           <button
             key={opt.value}
             type="button"
-            onClick={() => setTheme(opt.value)}
+            onClick={() => handleSelect(opt.value)}
             className={cn(
               "flex items-center gap-1.5 rounded px-2.5 py-1.5",
               active ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"

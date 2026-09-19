@@ -77,7 +77,7 @@ export function TokenManager({ initialTokens }: { initialTokens: TokenRow[] }) {
                 {token.revoked_at
                   ? "Revoked"
                   : token.last_used_at
-                    ? `Last used ${new Date(token.last_used_at).toLocaleDateString()}`
+                    ? `Last used ${new Date(token.last_used_at).toLocaleDateString("en-US")}`
                     : "Never used"}
               </p>
             </div>

@@ -56,10 +56,17 @@ export async function listTokens() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Revoked tokens are excluded here, not just hidden in the UI -- without
+  // this, every "Generate" + "Revoke" cycle left a dead row that kept
+  // showing up on every future page load, so the list only ever grew. The
+  // row itself isn't deleted (still useful as an audit trail of past
+  // tokens), it just isn't returned to a page that only ever wants to show
+  // the ones you could currently use.
   const { data, error } = await supabase
     .from("personal_access_tokens")
     .select("id, name, last_used_at, created_at, revoked_at")
     .eq("user_id", user.id)
+    .is("revoked_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);

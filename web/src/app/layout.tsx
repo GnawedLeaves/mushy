@@ -3,6 +3,7 @@ import { Space_Grotesk, Geist_Mono, Roboto_Flex } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { PwaRegister } from "@/components/fx/PwaRegister";
 import { ThemeProvider } from "@/components/fx/ThemeProvider";
+import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 // The app's global body/UI font. Swap this for a different next/font/google
@@ -58,7 +59,22 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Read here, at the root, rather than in (app)/layout.tsx -- next-themes'
+  // <html> class toggle has to be set from the root layout (the only place
+  // that renders <html> at all), so this is the one spot that needs to know
+  // the signed-in user's saved theme before ThemeProvider mounts. Signed-out
+  // visitors (including /login, /signup) just get next-themes' own default.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let defaultTheme: "light" | "dark" | "system" = "system";
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("theme").eq("id", user.id).maybeSingle();
+    if (profile?.theme) defaultTheme = profile.theme;
+  }
+
   return (
     <html
       lang="en"
@@ -71,7 +87,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${spaceGrotesk.variable} ${geistMono.variable} ${robotoFlex.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
+        <ThemeProvider defaultTheme={defaultTheme}>
           {children}
           <Toaster />
         </ThemeProvider>

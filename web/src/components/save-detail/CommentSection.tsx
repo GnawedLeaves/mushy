@@ -19,7 +19,13 @@ function timeAgo(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+  // Explicit locale, not the runtime's default -- this is a client
+  // component, so it renders once on the server (Node's own default
+  // locale) and again on the client (the visitor's browser locale) during
+  // hydration; those two rarely agree, and React treats any mismatch in
+  // the rendered text as a hydration error. Same fix as TokenManager's
+  // "Last used" date.
+  return new Date(iso).toLocaleDateString("en-US");
 }
 
 export function CommentSection({

@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { updateProfile, setProfilePrivacy } from "@/lib/actions/profile";
-import { USERNAME_MAX, DISPLAY_NAME_MAX, BIO_MAX } from "@/lib/limits";
+import { Textarea } from "@/components/ui/textarea";
+import { setProfilePrivacy, updateProfile } from "@/lib/actions/profile";
+import { BIO_MAX, DISPLAY_NAME_MAX, USERNAME_MAX } from "@/lib/limits";
 import type { Database } from "@/lib/supabase/database.types";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -83,7 +83,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             name="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            rows={3}
+            rows={5}
             maxLength={BIO_MAX}
           />
         </div>
