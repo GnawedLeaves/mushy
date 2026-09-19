@@ -104,6 +104,21 @@ export async function addComment(
     .single();
   if (error || !data) return { error: error?.message ?? "Could not post comment." };
 
+  // Best-effort, same as setSaveReaction's like notification -- runs as
+  // this (the commenter's) own RLS-scoped client, so it can only ever be
+  // attributed to themselves as actor_id, and never blocks the comment
+  // itself from landing if it fails.
+  const { data: save } = await supabase.from("saves").select("owner_id").eq("id", saveId).maybeSingle();
+  if (save && save.owner_id !== user.id) {
+    try {
+      await supabase
+        .from("notifications")
+        .insert({ recipient_id: save.owner_id, actor_id: user.id, type: "comment", save_id: saveId, comment_id: data.id });
+    } catch {
+      // Best-effort -- the comment itself already succeeded above.
+    }
+  }
+
   revalidatePath(`/s/${saveId}`);
   return { error: null, id: data.id, createdAt: data.created_at };
 }

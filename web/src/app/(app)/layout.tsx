@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/fx/AppShell";
 import { UserSearch } from "@/components/search/UserSearch";
 import { NavLink } from "@/components/nav/NavLink";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const supabase = await createClient();
@@ -41,6 +42,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <NavLink href="/help">Help</NavLink>
         {user ? (
           <>
+            <NotificationBell />
             {username && (
               <NavLink href={`/u/${username}`} exact>
                 @{username}

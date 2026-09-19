@@ -5,6 +5,7 @@ import { getSignedMediaUrls } from "@/lib/media";
 import { loadMoreSaves } from "@/lib/actions/gallery";
 import { GalleryGrid } from "@/components/gallery/GalleryGrid";
 import { InfiniteMasonryGrid } from "@/components/gallery/InfiniteMasonryGrid";
+import { GallerySearch } from "@/components/gallery/GallerySearch";
 import { cn } from "@/lib/utils";
 import type { SaveWithUrl } from "@/lib/types";
 
@@ -35,6 +36,8 @@ export default async function GalleryPage({
     </div>
   );
 
+  let mainContent: React.ReactNode;
+
   if (sortMode === "manual") {
     const { data: saves } = await supabase
       .from("saves")
@@ -45,22 +48,20 @@ export default async function GalleryPage({
     const urlMap = await getSignedMediaUrls((saves ?? []).map((s) => s.storage_path));
     const savesWithUrls: SaveWithUrl[] = (saves ?? []).map((s) => ({ ...s, mediaUrl: urlMap[s.storage_path] ?? null }));
 
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Your gallery</h1>
-          {sortToggle}
-        </div>
-        {savesWithUrls.length === 0 ? (
-          <EmptyGallery />
-        ) : (
-          <GalleryGrid saves={savesWithUrls} boards={boards ?? []} />
-        )}
-      </div>
+    mainContent = savesWithUrls.length === 0 ? (
+      <EmptyGallery />
+    ) : (
+      <GalleryGrid saves={savesWithUrls} boards={boards ?? []} />
     );
+  } else {
+    const firstPage = await loadMoreSaves(null);
+    mainContent =
+      firstPage.saves.length === 0 ? (
+        <EmptyGallery />
+      ) : (
+        <InfiniteMasonryGrid initialSaves={firstPage.saves} initialCursor={firstPage.nextCursor} boards={boards ?? []} />
+      );
   }
-
-  const firstPage = await loadMoreSaves(null);
 
   return (
     <div className="space-y-4">
@@ -68,11 +69,7 @@ export default async function GalleryPage({
         <h1 className="text-xl font-semibold">Your gallery</h1>
         {sortToggle}
       </div>
-      {firstPage.saves.length === 0 ? (
-        <EmptyGallery />
-      ) : (
-        <InfiniteMasonryGrid initialSaves={firstPage.saves} initialCursor={firstPage.nextCursor} boards={boards ?? []} />
-      )}
+      <GallerySearch boards={boards ?? []}>{mainContent}</GallerySearch>
     </div>
   );
 }

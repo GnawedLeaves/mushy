@@ -13,6 +13,7 @@
 
 export type MediaType = "image" | "gif" | "video";
 export type ReactionType = "like" | "dislike";
+export type NotificationType = "save_like" | "comment";
 
 export interface Database {
   public: {
@@ -225,6 +226,46 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "comment_reactions_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "comments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          recipient_id: string;
+          actor_id: string;
+          type: NotificationType;
+          save_id: string;
+          comment_id: string | null;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          recipient_id: string;
+          actor_id: string;
+          type: NotificationType;
+          save_id: string;
+          comment_id?: string | null;
+          read_at?: string | null;
+        };
+        Update: Partial<{
+          read_at: string | null;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "notifications_save_id_fkey";
+            columns: ["save_id"];
+            isOneToOne: false;
+            referencedRelation: "saves";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey";
             columns: ["comment_id"];
             isOneToOne: false;
             referencedRelation: "comments";

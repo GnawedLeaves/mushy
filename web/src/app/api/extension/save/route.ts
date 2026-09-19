@@ -6,11 +6,24 @@ import { fetchAndValidateMedia, MediaFetchError } from "@/lib/extension/mediaFet
 import { generateAestheticTags } from "@/lib/ai/aestheticTags";
 import { positionAtEnd } from "@/lib/reorder";
 import { withCors, CORS_HEADERS } from "@/lib/extension/cors";
+import { SAVE_CAPTION_MAX } from "@/lib/limits";
 
 interface SavePayload {
   mediaUrl: string;
   sourceUrl: string;
   sourceTitle?: string;
+  caption?: unknown;
+}
+
+// Same "trust nothing from the client" stance as sanitizing tags would need
+// -- caption is optional, client-supplied text from the extension's own
+// on-page prompt (see extension/src/background.ts's injectCaptionPrompt),
+// so it's trimmed and capped server-side too, not just via the input's own
+// maxLength on the extension side.
+function sanitizeCaption(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim().slice(0, SAVE_CAPTION_MAX);
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 // See me/route.ts for why OPTIONS needs to answer explicitly here too.
@@ -85,6 +98,7 @@ export async function POST(request: Request) {
     height: media.height,
     source_url: payload.sourceUrl,
     source_title: payload.sourceTitle ?? null,
+    caption: sanitizeCaption(payload.caption),
     position: positionAtEnd(maxRow?.position ?? null),
   });
 

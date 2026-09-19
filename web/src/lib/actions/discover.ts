@@ -74,13 +74,48 @@ export async function loadMoreDiscoverSaves(cursor: DiscoverCursor | null): Prom
   return { saves: discoverSaves, nextCursor };
 }
 
+const TAG_SCAN_LIMIT = 500;
+const TAG_SUGGESTION_LIMIT = 8;
+
+// Same scan-and-flatten approach as Gallery's suggestMyTags (lib/actions/gallery.ts),
+// scoped to public saves that aren't the caller's own -- there's no
+// dedicated tags table to query distinct values from, so this reads a
+// bounded window of visible saves' tags and filters in app code.
+export async function suggestDiscoverTags(query: string): Promise<string[]> {
+  const q = query.trim().toLowerCase();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("saves")
+    .select("tags")
+    .neq("owner_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(TAG_SCAN_LIMIT);
+
+  const seen = new Set<string>();
+  for (const row of data ?? []) {
+    for (const tag of row.tags ?? []) seen.add(tag);
+  }
+
+  const all = [...seen];
+  const matches = q ? all.filter((t) => t.includes(q)) : all;
+  matches.sort((a, b) => a.length - b.length || a.localeCompare(b));
+  return matches.slice(0, TAG_SUGGESTION_LIMIT);
+}
+
 // Tags are AI-generated at save time (see lib/ai/aestheticTags.ts) and never
 // shown in the UI -- this is the only place they're read, as a hidden filter
 // over the same "not mine" visibility rule loadMoreDiscoverSaves uses (RLS
 // still gates which rows are visible at all; this just narrows further).
-export async function searchSavesByTag(rawTag: string): Promise<DiscoverSave[]> {
-  const tag = rawTag.trim().toLowerCase();
-  if (!tag) return [];
+// Multiple tags are OR'd (.overlaps -- any shared tag matches), not AND'd.
+export async function searchSavesByTags(rawTags: string[]): Promise<DiscoverSave[]> {
+  const tags = [...new Set(rawTags.map((t) => t.trim().toLowerCase()).filter(Boolean))];
+  if (tags.length === 0) return [];
 
   const supabase = await createClient();
   const {
@@ -92,7 +127,7 @@ export async function searchSavesByTag(rawTag: string): Promise<DiscoverSave[]> 
     .from("saves")
     .select("*")
     .neq("owner_id", user.id)
-    .contains("tags", [tag])
+    .overlaps("tags", tags)
     .order("created_at", { ascending: false })
     .limit(60);
 
@@ -115,6 +150,91 @@ export async function searchSavesByTag(rawTag: string): Promise<DiscoverSave[]> 
       display_name: profileById.get(s.owner_id)?.display_name ?? null,
     },
   }));
+}
+
+export interface DomeGalleryItem {
+  id: string;
+  src: string;
+  alt: string;
+}
+
+export interface DomeGalleryPage {
+  items: DomeGalleryItem[];
+  nextOffset: number | null;
+}
+
+const DOME_PAGE_SIZE = 48;
+// Matches the Dome Gallery component's own default tile capacity
+// (segments=35 -> 35*5 = 175 slots) -- beyond this, more images would just
+// start recycling into already-used slots rather than filling new ones, so
+// there's no point fetching further.
+const DOME_MAX_ITEMS = 150;
+
+// Feeds the desktop Dome Gallery view of Discover (components/discover/DomeGalleryDiscover.tsx).
+// Offset-based, not the keyset pagination loadMoreDiscoverSaves uses --
+// popularity has no stable sort key to build a keyset cursor from without a
+// materialized column, so both sort modes here just share the simpler
+// (offset, capped pool) model instead of maintaining two different cursor
+// shapes for one gallery.
+export async function loadDomeGalleryPage(
+  offset: number,
+  tags: string[],
+  sort: "recency" | "popularity"
+): Promise<DomeGalleryPage> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { items: [], nextOffset: null };
+  if (offset >= DOME_MAX_ITEMS) return { items: [], nextOffset: null };
+
+  let query = supabase.from("saves").select("id, storage_path, caption").neq("owner_id", user.id);
+  const cleanTags = [...new Set(tags.map((t) => t.trim().toLowerCase()).filter(Boolean))];
+  if (cleanTags.length > 0) query = query.overlaps("tags", cleanTags);
+
+  if (sort === "recency") {
+    const { data } = await query
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(offset, offset + DOME_PAGE_SIZE - 1);
+    const rows = data ?? [];
+    const urlMap = await getSignedMediaUrls(rows.map((r) => r.storage_path));
+    const items = rows
+      .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "" }))
+      .filter((i) => i.src);
+    const nextOffset = rows.length === DOME_PAGE_SIZE && offset + DOME_PAGE_SIZE < DOME_MAX_ITEMS ? offset + DOME_PAGE_SIZE : null;
+    return { items, nextOffset };
+  }
+
+  // Popularity: rank a bounded candidate pool by net reactions in app code.
+  // At personal-app scale this is a reasonable trade-off against a
+  // materialized popularity column with real keyset pagination over an
+  // aggregate.
+  const { data: candidates } = await query.order("created_at", { ascending: false }).limit(500);
+  const rows = candidates ?? [];
+  if (rows.length === 0) return { items: [], nextOffset: null };
+
+  const { data: reactions } = await supabase
+    .from("save_reactions")
+    .select("save_id, reaction")
+    .in(
+      "save_id",
+      rows.map((r) => r.id)
+    );
+  const score = new Map<string, number>();
+  for (const r of reactions ?? []) {
+    score.set(r.save_id, (score.get(r.save_id) ?? 0) + (r.reaction === "like" ? 1 : -1));
+  }
+  const ranked = [...rows].sort((a, b) => (score.get(b.id) ?? 0) - (score.get(a.id) ?? 0));
+
+  const page = ranked.slice(offset, offset + DOME_PAGE_SIZE);
+  const urlMap = await getSignedMediaUrls(page.map((r) => r.storage_path));
+  const items = page
+    .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "" }))
+    .filter((i) => i.src);
+  const nextOffset =
+    offset + DOME_PAGE_SIZE < ranked.length && offset + DOME_PAGE_SIZE < DOME_MAX_ITEMS ? offset + DOME_PAGE_SIZE : null;
+  return { items, nextOffset };
 }
 
 // "Repin": copies someone else's public save into the caller's own gallery.

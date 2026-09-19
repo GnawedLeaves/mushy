@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Images, Compass, LayoutGrid, Search, Settings } from "lucide-react";
+import { Images, Compass, LayoutGrid, Search, Settings, Bell } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UserSearch } from "@/components/search/UserSearch";
+import { getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { cn } from "@/lib/utils";
 import { useSectionPath } from "@/lib/useSectionPath";
+
+const NOTIFICATION_POLL_MS = 30000;
 
 const TABS = [
   { href: "/", label: "Gallery", icon: Images },
@@ -19,6 +22,21 @@ const TABS = [
 export function MobileNav() {
   const pathname = useSectionPath();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function poll() {
+      const count = await getUnreadNotificationCount();
+      if (!cancelled) setUnread(count);
+    }
+    poll();
+    const interval = setInterval(poll, NOTIFICATION_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <>
@@ -51,6 +69,21 @@ export function MobileNav() {
         >
           <Search className="h-5 w-5" />
         </button>
+
+        {/* Links to a full page rather than a positioned dropdown -- the
+            desktop header's NotificationBell dropdown has room to render
+            below it; this floating pill doesn't. */}
+        <Link
+          href="/notifications"
+          aria-label="Notifications"
+          className={cn(
+            "relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+            pathname === "/notifications" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <Bell className="h-5 w-5" />
+          {unread > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />}
+        </Link>
 
         <Link
           href="/settings"

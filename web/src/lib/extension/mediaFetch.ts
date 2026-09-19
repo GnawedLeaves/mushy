@@ -54,7 +54,59 @@ export class MediaFetchError extends Error {
   }
 }
 
+function finalizeMedia(buffer: Buffer, mimeType: string): FetchedMedia {
+  if (!MIME_TO_EXT[mimeType]) {
+    throw new MediaFetchError(`Unsupported media type: ${mimeType || "unknown"}.`);
+  }
+
+  const mediaType = MIME_TO_MEDIA_TYPE[mimeType];
+  const maxBytes = mediaType === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  if (buffer.byteLength > maxBytes) {
+    throw new MediaFetchError(`File too large (${Math.round(buffer.byteLength / 1024 / 1024)}MB).`);
+  }
+
+  let width: number | null = null;
+  let height: number | null = null;
+  if (mediaType === "image" || mediaType === "gif") {
+    try {
+      const dimensions = probe.sync(buffer);
+      if (dimensions) {
+        width = dimensions.width;
+        height = dimensions.height;
+      }
+    } catch {
+      // Dimension probing is best-effort -- a save with null width/height
+      // still renders fine, just without a reserved aspect-ratio box.
+    }
+  }
+
+  return { buffer, mimeType, mediaType, ext: MIME_TO_EXT[mimeType], width, height };
+}
+
+const DATA_URL_PATTERN = /^data:([^;,]+)?(;charset=[^;,]+)?(;base64)?,([\s\S]*)$/;
+
+// The extension's element-capture flow (screenshot a <canvas> chart or any
+// other DOM node with no fetchable src -- see extension/src/content.ts) has
+// no URL to send at all, just the cropped PNG itself, so it's sent as a data:
+// URL instead. Decoded directly here rather than round-tripped through
+// fetch() -- avoids depending on the Node fetch implementation's own data:
+// URL support, and skips a pointless network-stack detour for bytes that are
+// already in the request body.
+function decodeDataUrl(dataUrl: string): FetchedMedia {
+  const match = DATA_URL_PATTERN.exec(dataUrl);
+  if (!match) throw new MediaFetchError("Malformed data URL.");
+  const mimeType = (match[1] || "application/octet-stream").toLowerCase();
+  const isBase64 = !!match[3];
+  const encoded = match[4];
+  const buffer = isBase64 ? Buffer.from(encoded, "base64") : Buffer.from(decodeURIComponent(encoded), "utf-8");
+  return finalizeMedia(buffer, mimeType);
+}
+
 export async function fetchAndValidateMedia(mediaUrl: string): Promise<FetchedMedia> {
+  if (mediaUrl.startsWith("data:")) {
+    return decodeDataUrl(mediaUrl);
+  }
+
   let response: Response;
   try {
     response = await fetch(mediaUrl, {
@@ -81,35 +133,12 @@ export async function fetchAndValidateMedia(mediaUrl: string): Promise<FetchedMe
     throw new MediaFetchError(`Unsupported media type: ${mimeType || "unknown"}.`);
   }
 
-  const mediaType = MIME_TO_MEDIA_TYPE[mimeType];
-  const maxBytes = mediaType === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
-
+  const maxBytes = MIME_TO_MEDIA_TYPE[mimeType] === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
   const contentLength = Number(response.headers.get("content-length") ?? 0);
   if (contentLength > maxBytes) {
     throw new MediaFetchError(`File too large (${Math.round(contentLength / 1024 / 1024)}MB).`);
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  if (arrayBuffer.byteLength > maxBytes) {
-    throw new MediaFetchError(`File too large (${Math.round(arrayBuffer.byteLength / 1024 / 1024)}MB).`);
-  }
-
-  const buffer = Buffer.from(arrayBuffer);
-
-  let width: number | null = null;
-  let height: number | null = null;
-  if (mediaType === "image" || mediaType === "gif") {
-    try {
-      const dimensions = probe.sync(buffer);
-      if (dimensions) {
-        width = dimensions.width;
-        height = dimensions.height;
-      }
-    } catch {
-      // Dimension probing is best-effort -- a save with null width/height
-      // still renders fine, just without a reserved aspect-ratio box.
-    }
-  }
-
-  return { buffer, mimeType, mediaType, ext: MIME_TO_EXT[mimeType], width, height };
+  return finalizeMedia(Buffer.from(arrayBuffer), mimeType);
 }

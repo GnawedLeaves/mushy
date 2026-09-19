@@ -44,6 +44,24 @@ export async function setSaveReaction(saveId: string, reaction: ReactionType | n
       .from("save_reactions")
       .upsert({ save_id: saveId, user_id: user.id, reaction }, { onConflict: "save_id,user_id" });
     if (error) throw new Error(error.message);
+
+    // Only "like" notifies -- a dislike isn't something worth surfacing to
+    // the owner the way a like or a comment is. Runs as this (the actor's)
+    // own RLS-scoped client, which is exactly why the notifications insert
+    // policy requires actor_id = auth.uid(): this insert can only ever be
+    // attributed to whoever is actually calling it. Best-effort: a failure
+    // here (e.g. self-like, which the recipient_id = actor_id case still
+    // inserts harmlessly) never blocks the reaction itself from landing.
+    if (reaction === "like") {
+      const { data: save } = await supabase.from("saves").select("owner_id").eq("id", saveId).maybeSingle();
+      if (save && save.owner_id !== user.id) {
+        try {
+          await supabase.from("notifications").insert({ recipient_id: save.owner_id, actor_id: user.id, type: "save_like", save_id: saveId });
+        } catch {
+          // Best-effort -- the reaction itself already succeeded above.
+        }
+      }
+    }
   }
 
   revalidatePath(`/s/${saveId}`);

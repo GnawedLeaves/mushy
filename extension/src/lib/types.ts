@@ -5,6 +5,7 @@ export interface SavePayload {
   mediaUrl: string;
   sourceUrl: string;
   sourceTitle?: string;
+  caption?: string;
 }
 
 export const DEFAULT_API_BASE = "https://mushy-six.vercel.app";
