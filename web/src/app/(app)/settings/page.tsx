@@ -6,6 +6,7 @@ import { signOut } from "@/lib/actions/auth";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { AvatarUploadForm } from "@/components/settings/AvatarUploadForm";
 import { TokenManager } from "@/components/settings/TokenManager";
+import { ThemeToggle } from "@/components/settings/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { getAvatarUrl } from "@/lib/media";
@@ -50,6 +51,13 @@ export default async function SettingsPage() {
             <ProfileForm profile={profile} />
           </>
         )}
+      </section>
+
+      <Separator />
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Appearance</h2>
+        <ThemeToggle />
       </section>
 
       <Separator />

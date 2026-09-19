@@ -121,6 +121,8 @@ export default function DomeGallery({
   imageBorderRadius = "30px",
   openedImageBorderRadius = "30px",
   grayscale = false,
+  autoRotate = true,
+  autoRotateSpeed = 4,
   onOpenSave,
 }: {
   images?: (string | DomeGalleryImage)[];
@@ -140,6 +142,12 @@ export default function DomeGallery({
   imageBorderRadius?: string;
   openedImageBorderRadius?: string;
   grayscale?: boolean;
+  // Slow constant idle spin, degrees/second -- pauses the instant the
+  // viewer drags, has a tile enlarged, or is coasting on drag-release
+  // inertia, and picks back up the instant all three clear, rather than
+  // fighting either interaction or waiting out a cooldown.
+  autoRotate?: boolean;
+  autoRotateSpeed?: number;
   // Called when the viewer clicks "View save" on an enlarged tile -- the
   // component has no navigation of its own (it's a pure image viewer), so
   // the host page decides what "open this save" means.
@@ -191,6 +199,30 @@ export default function DomeGallery({
   };
 
   const lockedRadiusRef = useRef<number | null>(null);
+
+  // A single persistent rAF loop that checks, every frame, whether it's
+  // safe to advance the spin -- rather than starting/stopping a loop on
+  // every drag/enlarge transition (more moving parts, more chances for a
+  // stopped loop to never restart). Delta-time based so the spin rate is
+  // consistent regardless of frame rate.
+  useEffect(() => {
+    if (!autoRotate) return;
+    let raf: number;
+    let lastTs: number | null = null;
+    const step = (ts: number) => {
+      if (lastTs === null) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      if (!draggingRef.current && !focusedElRef.current && inertiaRAF.current === null) {
+        const nextY = wrapAngleSigned(rotationRef.current.y + autoRotateSpeed * dt);
+        rotationRef.current = { x: rotationRef.current.x, y: nextY };
+        applyTransform(rotationRef.current.x, nextY);
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [autoRotate, autoRotateSpeed]);
 
   useEffect(() => {
     const root = rootRef.current;
