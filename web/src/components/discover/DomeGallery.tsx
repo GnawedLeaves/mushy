@@ -13,6 +13,7 @@ export interface DomeGalleryImage {
   src: string;
   alt?: string;
   id?: string;
+  isVideo?: boolean;
 }
 
 interface ItemCoord {
@@ -26,6 +27,7 @@ interface BuiltItem extends ItemCoord {
   src: string;
   alt: string;
   id: string | null;
+  isVideo: boolean;
 }
 
 const DEFAULTS = {
@@ -59,7 +61,7 @@ function buildItems(pool: (string | DomeGalleryImage)[], seg: number): BuiltItem
 
   const totalSlots = coords.length;
   if (pool.length === 0) {
-    return coords.map((c) => ({ ...c, src: "", alt: "", id: null }));
+    return coords.map((c) => ({ ...c, src: "", alt: "", id: null, isVideo: false }));
   }
   if (pool.length > totalSlots && process.env.NODE_ENV !== "production") {
     console.warn(
@@ -69,8 +71,8 @@ function buildItems(pool: (string | DomeGalleryImage)[], seg: number): BuiltItem
 
   const normalizedImages = pool.map((image) =>
     typeof image === "string"
-      ? { src: image, alt: "", id: null as string | null }
-      : { src: image.src || "", alt: image.alt || "", id: image.id ?? null }
+      ? { src: image, alt: "", id: null as string | null, isVideo: false }
+      : { src: image.src || "", alt: image.alt || "", id: image.id ?? null, isVideo: image.isVideo ?? false }
   );
 
   const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
@@ -93,6 +95,7 @@ function buildItems(pool: (string | DomeGalleryImage)[], seg: number): BuiltItem
     src: usedImages[i].src,
     alt: usedImages[i].alt,
     id: usedImages[i].id,
+    isVideo: usedImages[i].isVideo,
   }));
 }
 
@@ -444,11 +447,16 @@ export default function DomeGallery({
       const animatingOverlay = document.createElement("div");
       animatingOverlay.className = "enlarge-closing";
       animatingOverlay.style.cssText = `position:absolute;left:${overlayRelativeToRoot.left}px;top:${overlayRelativeToRoot.top}px;width:${overlayRelativeToRoot.width}px;height:${overlayRelativeToRoot.height}px;z-index:9999;border-radius: var(--enlarge-radius, 32px);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:all ${enlargeTransitionMs}ms ease-out;pointer-events:none;margin:0;transform:none;`;
-      const originalImg = overlay.querySelector("img");
-      if (originalImg) {
-        const img = originalImg.cloneNode() as HTMLImageElement;
-        img.style.cssText = "width:100%;height:100%;object-fit:cover;";
-        animatingOverlay.appendChild(img);
+      // A cloned <video> resets to its first frame and stops playing (per
+      // spec, cloneNode doesn't carry playback state) -- fine here, this
+      // clone only exists to fill the ~300ms shrink-and-fade close
+      // animation, not to keep playing.
+      const originalMedia = overlay.querySelector("img, video");
+      if (originalMedia) {
+        const clone = originalMedia.cloneNode() as HTMLImageElement | HTMLVideoElement;
+        clone.style.cssText = "width:100%;height:100%;object-fit:cover;";
+        if (clone instanceof HTMLVideoElement) clone.controls = false;
+        animatingOverlay.appendChild(clone);
       }
       overlay.remove();
       rootRef.current.appendChild(animatingOverlay);
@@ -559,10 +567,22 @@ export default function DomeGallery({
       overlay.style.willChange = "transform, opacity";
       overlay.style.transformOrigin = "top left";
       overlay.style.transition = `transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease`;
-      const rawSrc = parent.dataset.src || el.querySelector("img")?.src || "";
-      const img = document.createElement("img");
-      img.src = rawSrc;
-      overlay.appendChild(img);
+      const rawSrc = parent.dataset.src || el.querySelector("img, video")?.getAttribute("src") || "";
+      const isVideo = parent.dataset.isVideo === "true";
+      if (isVideo) {
+        const video = document.createElement("video");
+        video.src = rawSrc;
+        video.muted = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.controls = true;
+        overlay.appendChild(video);
+      } else {
+        const img = document.createElement("img");
+        img.src = rawSrc;
+        overlay.appendChild(img);
+      }
 
       // Dome Gallery is a pure image viewer with no navigation of its own --
       // this is the one addition to the vendored source, since the host app
@@ -688,6 +708,7 @@ export default function DomeGallery({
                 className="item"
                 data-src={it.src}
                 data-id={it.id ?? undefined}
+                data-is-video={it.isVideo ? "true" : undefined}
                 data-offset-x={it.x}
                 data-offset-y={it.y}
                 data-size-x={it.sizeX}
@@ -709,10 +730,16 @@ export default function DomeGallery({
                   onClick={onTileClick}
                   onPointerUp={onTilePointerUp}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- imperative
-                      DOM tile the vendored dome animation reads/clones directly
-                      (see openItemFromElement), not a normal rendered image */}
-                  {it.src && <img src={it.src} draggable={false} alt={it.alt} />}
+                  {/* Imperative DOM tile the vendored dome animation reads/clones
+                      directly (see openItemFromElement), not a normal rendered
+                      image/video. */}
+                  {it.src && it.isVideo && (
+                    <video src={it.src} draggable={false} muted autoPlay loop playsInline />
+                  )}
+                  {it.src && !it.isVideo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={it.src} draggable={false} alt={it.alt} />
+                  )}
                 </div>
               </div>
             ))}

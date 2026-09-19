@@ -156,6 +156,7 @@ export interface DomeGalleryItem {
   id: string;
   src: string;
   alt: string;
+  isVideo: boolean;
 }
 
 export interface DomeGalleryPage {
@@ -188,7 +189,7 @@ export async function loadDomeGalleryPage(
   if (!user) return { items: [], nextOffset: null };
   if (offset >= DOME_MAX_ITEMS) return { items: [], nextOffset: null };
 
-  let query = supabase.from("saves").select("id, storage_path, caption").neq("owner_id", user.id);
+  let query = supabase.from("saves").select("id, storage_path, caption, media_type").neq("owner_id", user.id);
   const cleanTags = [...new Set(tags.map((t) => t.trim().toLowerCase()).filter(Boolean))];
   if (cleanTags.length > 0) query = query.overlaps("tags", cleanTags);
 
@@ -200,7 +201,7 @@ export async function loadDomeGalleryPage(
     const rows = data ?? [];
     const urlMap = await getSignedMediaUrls(rows.map((r) => r.storage_path));
     const items = rows
-      .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "" }))
+      .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "", isVideo: r.media_type === "video" }))
       .filter((i) => i.src);
     const nextOffset = rows.length === DOME_PAGE_SIZE && offset + DOME_PAGE_SIZE < DOME_MAX_ITEMS ? offset + DOME_PAGE_SIZE : null;
     return { items, nextOffset };
@@ -230,7 +231,7 @@ export async function loadDomeGalleryPage(
   const page = ranked.slice(offset, offset + DOME_PAGE_SIZE);
   const urlMap = await getSignedMediaUrls(page.map((r) => r.storage_path));
   const items = page
-    .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "" }))
+    .map((r) => ({ id: r.id, src: urlMap[r.storage_path] ?? "", alt: r.caption ?? "", isVideo: r.media_type === "video" }))
     .filter((i) => i.src);
   const nextOffset =
     offset + DOME_PAGE_SIZE < ranked.length && offset + DOME_PAGE_SIZE < DOME_MAX_ITEMS ? offset + DOME_PAGE_SIZE : null;

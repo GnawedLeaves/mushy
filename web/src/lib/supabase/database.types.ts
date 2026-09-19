@@ -13,7 +13,7 @@
 
 export type MediaType = "image" | "gif" | "video";
 export type ReactionType = "like" | "dislike";
-export type NotificationType = "save_like" | "comment";
+export type NotificationType = "save_like" | "save_dislike" | "comment";
 export type ThemePreference = "light" | "dark" | "system";
 
 export interface Database {

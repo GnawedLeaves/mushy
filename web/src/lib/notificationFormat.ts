@@ -17,5 +17,6 @@ export function notificationTimeAgo(iso: string): string {
 export function describeNotification(n: NotificationItem): string {
   const name = n.actor.displayName || `@${n.actor.username}`;
   if (n.type === "save_like") return `${name} liked your save`;
+  if (n.type === "save_dislike") return `${name} disliked your save`;
   return `${name} commented: "${n.commentPreview ?? "..."}"`;
 }
