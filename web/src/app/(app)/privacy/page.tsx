@@ -74,12 +74,11 @@ export default function PrivacyPage() {
             <li>A local count of how many times you&apos;ve saved something, and when, shown in the extension&apos;s popup.</li>
           </ul>
           <p className="text-sm text-muted-foreground">
-            When you right-click and choose &quot;Save to Mushy Six&quot; or &quot;Select element to
-            save...&quot;, the extension sends the image/video URL (or, for the element picker, a screenshot
-            cropped to the element you selected), the source page&apos;s URL and title, and any caption you
-            type, to the Mushy Six API using your access token. It does not read, log, or transmit anything
-            from pages you visit beyond that one explicit action — there is no passive browsing history
-            tracking, click tracking, or keystroke logging.
+            When you right-click an image, video, or media link and choose &quot;Save to Mushy Six&quot;,
+            the extension sends that file&apos;s URL, the source page&apos;s URL and title, and any caption
+            you type, to the Mushy Six API using your access token. It does not read, log, or transmit
+            anything from pages you visit beyond that one explicit action — there is no passive browsing
+            history tracking, click tracking, or keystroke logging.
           </p>
         </section>
 

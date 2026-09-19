@@ -17,15 +17,14 @@ chrome.runtime.onInstalled.addListener(() => {
     targetUrlPatterns: MEDIA_LINK_PATTERNS,
   });
 
-  // For things with no fetchable src at all -- a chart drawn onto a
-  // <canvas>, a styled card, an SVG icon. "..." signals it's a mode you
-  // step into (hover to highlight, scroll to widen/narrow, click to
-  // confirm -- see content.ts), not a one-shot action like the two above.
-  chrome.contextMenus.create({
-    id: "mushy-save-element",
-    title: "Select element to save...",
-    contexts: ["all"],
-  });
+  // A third "Select element to save..." item (contexts: ["all"], screenshot
+  // + crop via an interactive hover/scroll/click picker in content.ts) is
+  // shelved for now -- the picker interaction wasn't reliable enough to
+  // ship. Not deleted: handlePickerResult/cropToDataUrl below and
+  // content.ts are left intact so it can be re-registered here once fixed,
+  // without needing to be rebuilt from scratch. Re-enabling it also means
+  // restoring the content_scripts entry (and the broader host permission it
+  // requires) in manifest.json.
 });
 
 function mediaTypeFromUrl(url: string): "image" | "gif" | "video" {
@@ -325,15 +324,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     handleSave(info.srcUrl, sourceUrl, tab?.title, tab?.id);
   } else if (info.menuItemId === "mushy-save-link" && info.linkUrl) {
     handleSave(info.linkUrl, sourceUrl, tab?.title, tab?.id);
-  } else if (info.menuItemId === "mushy-save-element" && tab?.id !== undefined) {
-    chrome.tabs.sendMessage(tab.id, { type: "mushy-start-picker" }).catch(() => {
-      chrome.notifications.create({
-        type: "basic",
-        iconUrl: chrome.runtime.getURL("icons/icon128.png"),
-        title: "Could not start",
-        message: "This page doesn't support element picking (try a normal webpage, not chrome:// or the Web Store).",
-      });
-    });
   }
 });
 
