@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export function DiscoverCard({ save }: { save: DiscoverSave }) {
+export function DiscoverCard({ save, showTags = false }: { save: DiscoverSave; showTags?: boolean }) {
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -72,6 +72,16 @@ export function DiscoverCard({ save }: { save: DiscoverSave }) {
           {save.owner.display_name || `@${save.owner.username}`}
         </Link>
       </div>
+
+      {showTags && save.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 px-2 pb-2">
+          {save.tags.map((tag) => (
+            <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

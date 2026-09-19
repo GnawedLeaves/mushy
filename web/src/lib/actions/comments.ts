@@ -42,13 +42,20 @@ export async function listComments(saveId: string): Promise<CommentWithMeta[]> {
   // no direct FK from comments to profiles (both key off auth.users
   // independently), so PostgREST can't auto-embed -- fetch separately.
   const [{ data: authors }, { data: reactions }] = await Promise.all([
-    supabase.from("profiles").select("id, username, display_name, avatar_path").in("id", authorIds),
+    supabase.from("profiles").select("id, username, display_name, avatar_path, updated_at").in("id", authorIds),
     supabase.from("comment_reactions").select("comment_id, user_id, reaction").in("comment_id", commentIds),
   ]);
 
   const authorById = new Map((authors ?? []).map((a) => [a.id, a]));
-  const avatarUrl = (path: string | null) =>
-    path ? supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl : null;
+  // Avatars always upload to the same fixed storage key (lib/actions/profile.ts's
+  // uploadAvatar), so the URL itself never changes when someone replaces their
+  // photo -- comments looked up the *current* avatar_path already (this was
+  // never hard-saved onto the comment row), but without a cache-busting query
+  // param the browser just kept serving whatever it had cached for that
+  // unchanged URL, which is what actually made an old photo "stick". Same fix
+  // as lib/media.ts's getAvatarUrl.
+  const avatarUrl = (path: string | null, updatedAt: string | null) =>
+    path ? `${supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl}?v=${encodeURIComponent(updatedAt ?? "")}` : null;
   const tally = new Map<string, { like: number; dislike: number; mine: ReactionType | null }>();
   for (const id of commentIds) tally.set(id, { like: 0, dislike: 0, mine: null });
   for (const r of reactions ?? []) {
@@ -69,7 +76,7 @@ export async function listComments(saveId: string): Promise<CommentWithMeta[]> {
       author: {
         username: author?.username ?? "unknown",
         display_name: author?.display_name ?? null,
-        avatarUrl: avatarUrl(author?.avatar_path ?? null),
+        avatarUrl: avatarUrl(author?.avatar_path ?? null, author?.updated_at ?? null),
       },
       likes: bucket.like,
       dislikes: bucket.dislike,

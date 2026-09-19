@@ -53,7 +53,7 @@ export function MobileNav() {
       </Link>
 
       <nav
-        className="fixed inset-x-0 bottom-4 z-30 mx-auto flex w-fit items-center gap-1 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md sm:hidden"
+        className="fixed inset-x-0 bottom-8 z-30 mx-auto flex w-fit items-center gap-1 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md sm:hidden"
         style={{ left: "50%", transform: "translateX(-50%)" }}
       >
         {TABS.map((tab) => {

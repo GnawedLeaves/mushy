@@ -40,7 +40,7 @@ export async function listNotifications(): Promise<NotificationItem[]> {
   const commentIds = notifications.map((n) => n.comment_id).filter((id): id is string => !!id);
 
   const [{ data: actors }, { data: comments }] = await Promise.all([
-    supabase.from("profiles").select("id, username, display_name, avatar_path").in("id", actorIds),
+    supabase.from("profiles").select("id, username, display_name, avatar_path, updated_at").in("id", actorIds),
     commentIds.length > 0
       ? supabase.from("comments").select("id, body").in("id", commentIds)
       : Promise.resolve({ data: [] as { id: string; body: string }[] }),
@@ -51,8 +51,11 @@ export async function listNotifications(): Promise<NotificationItem[]> {
 
   return notifications.map((n) => {
     const actor = actorById.get(n.actor_id);
+    // Same cache-busting need as comments (lib/actions/comments.ts) and
+    // getAvatarUrl (lib/media.ts) -- the storage key never changes when
+    // someone replaces their photo, only a query param forces a refetch.
     const avatarUrl = actor?.avatar_path
-      ? supabase.storage.from("avatars").getPublicUrl(actor.avatar_path).data.publicUrl
+      ? `${supabase.storage.from("avatars").getPublicUrl(actor.avatar_path).data.publicUrl}?v=${encodeURIComponent(actor.updated_at ?? "")}`
       : null;
     return {
       id: n.id,

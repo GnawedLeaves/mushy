@@ -82,7 +82,7 @@ export function TagFilterInput({
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
-      <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-1.5">
+      <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-lg border border-input bg-transparent px-3.5 py-2.5">
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         {tags.map((tag) => (
           <span
@@ -104,7 +104,14 @@ export function TagFilterInput({
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={tags.length === 0 ? placeholder : ""}
-          className="h-6 min-w-[100px] flex-1 border-none bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+          // dark:bg-transparent has to be explicit, not just bg-transparent --
+          // the base Input component's own dark:bg-input/30 is a *scoped*
+          // (dark-variant) class, not a plain conflicting one, so
+          // tailwind-merge doesn't treat an unprefixed bg-transparent as
+          // overriding it. Without this, dark mode showed a faint rectangle
+          // where the input's own background peeked through against this
+          // wrapper's.
+          className="h-6 min-w-[100px] flex-1 border-none bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
       </div>
 

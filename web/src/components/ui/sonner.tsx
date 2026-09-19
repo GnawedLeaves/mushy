@@ -10,6 +10,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      // Sonner's own default is bottom-right, which on mobile sits right on
+      // top of the floating nav pill (MobileNav.tsx) -- a toast there
+      // blocks it for as long as the toast is visible.
+      position="top-right"
       className="toaster group"
       icons={{
         success: (

@@ -25,9 +25,15 @@ import type { BoardSummary, SaveWithUrl } from "@/lib/types";
 export function SaveCard({
   save,
   boards,
+  showTags = false,
 }: {
   save: SaveWithUrl;
   boards: BoardSummary[];
+  // Tags are otherwise hidden everywhere (they only ever powered search),
+  // per the original design -- callers doing a tag search flip this on so
+  // the viewer can see *why* a given card matched, without tags becoming
+  // permanent visible clutter on every card everywhere else.
+  showTags?: boolean;
 }) {
   const [caption, setCaption] = useState(save.caption ?? "");
   const [isPrivate, setIsPrivate] = useState(save.is_private);
@@ -178,6 +184,16 @@ export function SaveCard({
           className="w-full resize-none overflow-hidden bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>
+
+      {showTags && save.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 px-2 pb-2">
+          {save.tags.map((tag) => (
+            <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {isPrivate && (
         <div className="absolute left-2 top-2">

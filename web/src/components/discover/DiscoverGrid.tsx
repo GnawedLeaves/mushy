@@ -115,7 +115,7 @@ export function DiscoverGrid({
       {(!isSearchMode || (!searching && visibleSaves.length > 0)) && (
         <div className="columns-2 gap-4 sm:columns-3 lg:columns-4">
           {visibleSaves.map((save) => (
-            <DiscoverCard key={save.id} save={save} />
+            <DiscoverCard key={save.id} save={save} showTags={isSearchMode} />
           ))}
         </div>
       )}
