@@ -72,7 +72,13 @@ export function GallerySearch({ boards, children }: { boards: BoardSummary[]; ch
           {!loading && results && results.length > 0 && (
             <div className="columns-2 gap-4 sm:columns-3 lg:columns-4">
               {results.map((save) => (
-                <SaveCard key={save.id} save={save} boards={boards} showTags />
+                <SaveCard
+                  key={save.id}
+                  save={save}
+                  boards={boards}
+                  showTags
+                  onDeleted={(id) => setResults((prev) => prev?.filter((s) => s.id !== id) ?? prev)}
+                />
               ))}
             </div>
           )}

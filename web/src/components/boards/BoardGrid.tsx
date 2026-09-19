@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -53,6 +53,21 @@ export function BoardGrid({ boardId, saves, editable }: { boardId: string; saves
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  // `useState(saves)` only reads its initial value once, on mount -- it
+  // doesn't automatically resync when this component gets a new `saves`
+  // prop from a later server render (e.g. after AddSavesDialog's
+  // revalidatePath brings back a longer list, or after navigating away and
+  // back to a board a save was removed from elsewhere). Without this, an
+  // added save didn't show until a hard reload force-remounted the whole
+  // component, and a board could look empty/stale on return even though
+  // the server's data was already correct.
+  useEffect(() => {
+    // Deferred a tick so this isn't a setState called directly inside the
+    // effect body (react-hooks/set-state-in-effect) -- same pattern as
+    // lib/useSectionPath.ts.
+    queueMicrotask(() => setOrdered(saves));
+  }, [saves]);
 
   function handleRemoved(saveId: string) {
     setOrdered((prev) => prev.filter((s) => s.id !== saveId));

@@ -17,7 +17,15 @@ import { reorderSave } from "@/lib/actions/saves";
 import { SaveCard } from "@/components/gallery/SaveCard";
 import type { BoardSummary, SaveWithUrl } from "@/lib/types";
 
-function SortableSaveCard({ save, boards }: { save: SaveWithUrl; boards: BoardSummary[] }) {
+function SortableSaveCard({
+  save,
+  boards,
+  onDeleted,
+}: {
+  save: SaveWithUrl;
+  boards: BoardSummary[];
+  onDeleted: (saveId: string) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: save.id });
 
   return (
@@ -35,7 +43,7 @@ function SortableSaveCard({ save, boards }: { save: SaveWithUrl; boards: BoardSu
         >
           <GripVertical className="h-4 w-4" />
         </button>
-        <SaveCard save={save} boards={boards} />
+        <SaveCard save={save} boards={boards} onDeleted={onDeleted} />
       </div>
     </div>
   );
@@ -50,6 +58,10 @@ export function GalleryGrid({ saves, boards }: { saves: SaveWithUrl[]; boards: B
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  function handleDeleted(saveId: string) {
+    setOrderedSaves((prev) => prev.filter((s) => s.id !== saveId));
+  }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -71,7 +83,7 @@ export function GalleryGrid({ saves, boards }: { saves: SaveWithUrl[]; boards: B
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {orderedSaves.map((save) => (
             <div key={save.id} className="group">
-              <SortableSaveCard save={save} boards={boards} />
+              <SortableSaveCard save={save} boards={boards} onDeleted={handleDeleted} />
             </div>
           ))}
         </div>

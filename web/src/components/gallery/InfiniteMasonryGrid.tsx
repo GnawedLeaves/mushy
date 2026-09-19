@@ -22,6 +22,10 @@ export function InfiniteMasonryGrid({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
 
+  function handleDeleted(saveId: string) {
+    setSaves((prev) => prev.filter((s) => s.id !== saveId));
+  }
+
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !cursor) return;
     loadingRef.current = true;
@@ -53,7 +57,7 @@ export function InfiniteMasonryGrid({
       <div className="columns-2 gap-4 sm:columns-3 lg:columns-4">
         <AnimatePresence>
           {saves.map((save) => (
-            <SaveCard key={save.id} save={save} boards={boards} />
+            <SaveCard key={save.id} save={save} boards={boards} onDeleted={handleDeleted} />
           ))}
         </AnimatePresence>
       </div>

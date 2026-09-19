@@ -5,6 +5,7 @@ import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { MediaThumb } from "@/components/gallery/MediaThumb";
 import { addSavesToBoard, loadMoreAvailableSaves, type AvailableSavesCursor } from "@/lib/actions/board-saves";
 import type { SaveWithUrl } from "@/lib/types";
 
@@ -115,10 +116,18 @@ export function AddSavesDialog({
                   className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
                   disabled={added}
                 >
-                  {save.mediaUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={save.mediaUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
-                  )}
+                  {/* Was a bare <img>, which silently renders nothing for a
+                      video's mediaUrl -- an <img> can't play video, so every
+                      video save just showed as a blank tile here. MediaThumb
+                      already handles the image-vs-video branch correctly
+                      everywhere else this app shows a save's media. */}
+                  <MediaThumb
+                    mediaUrl={save.mediaUrl}
+                    mediaType={save.media_type}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    videoProps={{ muted: true, autoPlay: false }}
+                  />
                   <div
                     className={`absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-medium text-white transition-opacity ${
                       added ? "opacity-100" : "opacity-0 group-hover:opacity-100"

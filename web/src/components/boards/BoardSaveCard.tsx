@@ -31,6 +31,7 @@ export function BoardSaveCard({
     startTransition(async () => {
       try {
         await removeSaveFromBoard(boardId, save.id);
+        toast.success("Removed from board");
       } catch {
         toast.error("Could not remove from board.");
       }

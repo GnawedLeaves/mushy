@@ -26,6 +26,7 @@ export function SaveCard({
   save,
   boards,
   showTags = false,
+  onDeleted,
 }: {
   save: SaveWithUrl;
   boards: BoardSummary[];
@@ -34,6 +35,14 @@ export function SaveCard({
   // the viewer can see *why* a given card matched, without tags becoming
   // permanent visible clutter on every card everywhere else.
   showTags?: boolean;
+  // The grids that render this card each hold their own local copy of the
+  // save list (paginated feed, manual-order list, search results) -- a
+  // Server Action's revalidatePath refreshes the *server* data, but a
+  // Client Component's own useState doesn't automatically resync to a
+  // changed prop, so without this callback a deleted save kept showing
+  // until a full remount (e.g. a hard reload). Optional because not every
+  // caller needs it (e.g. a context with no local list to update).
+  onDeleted?: (saveId: string) => void;
 }) {
   const [caption, setCaption] = useState(save.caption ?? "");
   const [isPrivate, setIsPrivate] = useState(save.is_private);
@@ -68,6 +77,7 @@ export function SaveCard({
       try {
         await deleteSave(save.id);
         toast.success("Save deleted");
+        onDeleted?.(save.id);
       } catch {
         toast.error("Could not delete save.");
       }
