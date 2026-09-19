@@ -1,5 +1,6 @@
 import { PublicProfileGrid } from "@/components/profile/PublicProfileGrid";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { BackButton } from "@/components/nav/BackButton";
 import { getAvatarUrl, getSignedMediaUrls } from "@/lib/media";
 import { createClient } from "@/lib/supabase/server";
 import type { SaveWithUrl } from "@/lib/types";
@@ -46,6 +47,7 @@ export default async function PublicProfilePage({
 
   return (
     <div>
+      <BackButton className="mb-4" />
       <div className="mb-10 flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-card/80 p-6 shadow-sm backdrop-blur-md">
         <div className="flex items-start gap-4">
           <ProfileAvatar avatarUrl={avatarUrl} label={profile.display_name || profile.username} />

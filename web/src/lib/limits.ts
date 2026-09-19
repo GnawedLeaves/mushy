@@ -8,3 +8,9 @@ export const BOARD_TITLE_MAX = 60;
 export const BOARD_DESCRIPTION_MAX = 300;
 export const SAVE_CAPTION_MAX = 200;
 export const COMMENT_MAX = 1000;
+// Keyset page size for the "Add saves to board" dialog's initial load and
+// its "Load more" (lib/actions/board-saves.ts's loadMoreAvailableSaves) --
+// kept here rather than as a `const` export from that file because a "use
+// server" module may only export async functions at the top level; a plain
+// value export there breaks the whole module.
+export const AVAILABLE_SAVES_PAGE_SIZE = 24;

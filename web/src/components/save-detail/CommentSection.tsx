@@ -83,7 +83,9 @@ export function CommentSection({
 
   function handleDelete(commentId: string) {
     setComments((prev) => prev.filter((c) => c.id !== commentId));
-    deleteComment(commentId, saveId).catch(() => toast.error("Could not delete comment."));
+    deleteComment(commentId, saveId)
+      .then(() => toast.success("Comment deleted"))
+      .catch(() => toast.error("Could not delete comment."));
   }
 
   return (

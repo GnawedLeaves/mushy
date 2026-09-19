@@ -67,6 +67,7 @@ export function SaveCard({
     startTransition(async () => {
       try {
         await deleteSave(save.id);
+        toast.success("Save deleted");
       } catch {
         toast.error("Could not delete save.");
       }
@@ -111,7 +112,11 @@ export function SaveCard({
           />
         </Link>
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
+        {/* Always visible on mobile, hover-reveal on desktop: opacity-0 +
+            group-hover has no touch equivalent, so on a phone these
+            controls -- the triple-dot menu especially -- were effectively
+            undiscoverable (nothing ever showed them). */}
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <a
             href={save.source_url}
             target="_blank"
@@ -125,7 +130,7 @@ export function SaveCard({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button size="icon" variant="secondary" className="h-7 w-7 bg-black/60 text-white hover:bg-black/80" />
+                <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 text-white hover:bg-black/80" />
               }
             >
               <MoreVertical className="h-4 w-4" />

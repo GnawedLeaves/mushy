@@ -9,6 +9,8 @@ import { ReactionButtons } from "@/components/save-detail/ReactionButtons";
 import { FullscreenViewer } from "@/components/save-detail/FullscreenViewer";
 import { CommentSection } from "@/components/save-detail/CommentSection";
 import { SaveToGalleryButton } from "@/components/save-detail/SaveToGalleryButton";
+import { SaveDetailMenu } from "@/components/save-detail/SaveDetailMenu";
+import { BackButton } from "@/components/nav/BackButton";
 
 export default async function SaveDetailPage({
   params,
@@ -30,22 +32,31 @@ export default async function SaveDetailPage({
 
   const isOwner = viewer?.id === save.owner_id;
 
-  const [{ data: owner }, mediaUrl, reactionSummary, comments, { data: viewerProfile }] = await Promise.all([
-    supabase.from("profiles").select("username, display_name").eq("id", save.owner_id).maybeSingle(),
-    getSignedMediaUrl(save.storage_path),
-    getSaveReactionSummary(save.id),
-    listComments(save.id),
-    viewer
-      ? supabase.from("profiles").select("username, display_name, avatar_path").eq("id", viewer.id).maybeSingle()
-      : Promise.resolve({ data: null }),
-  ]);
+  const [{ data: owner }, mediaUrl, reactionSummary, comments, { data: viewerProfile }, { data: ownerBoards }] =
+    await Promise.all([
+      supabase.from("profiles").select("username, display_name").eq("id", save.owner_id).maybeSingle(),
+      getSignedMediaUrl(save.storage_path),
+      getSaveReactionSummary(save.id),
+      listComments(save.id),
+      viewer
+        ? supabase.from("profiles").select("username, display_name, avatar_path").eq("id", viewer.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      isOwner
+        ? supabase.from("boards").select("id, title").eq("owner_id", save.owner_id).order("title")
+        : Promise.resolve({ data: null }),
+    ]);
 
   const viewerAvatarUrl = viewerProfile?.avatar_path
     ? supabase.storage.from("avatars").getPublicUrl(viewerProfile.avatar_path).data.publicUrl
     : null;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-4">
+      <div className="flex items-center justify-between">
+        <BackButton />
+        {isOwner && <SaveDetailMenu saveId={save.id} isPrivate={save.is_private} boards={ownerBoards ?? []} />}
+      </div>
+
       <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
         <div className="relative flex max-h-[70vh] items-center justify-center bg-muted">
           <MediaThumb
@@ -64,6 +75,16 @@ export default async function SaveDetailPage({
 
         <div className="space-y-4 p-5">
           {save.caption && <p className="text-base">{save.caption}</p>}
+
+          {save.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {save.tags.map((tag) => (
+                <span key={tag} className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-muted-foreground">

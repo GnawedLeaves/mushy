@@ -63,12 +63,14 @@ export function BoardSettingsMenu({ board }: { board: BoardRow }) {
       // returned normally without deleting. There's currently no such path,
       // but if one's added later this keeps the pending state honest.
     } catch (err) {
-      if (!isRedirectError(err)) {
+      if (isRedirectError(err)) {
+        // A redirect error means success -- the navigation is already
+        // underway, so leave `deleting` true rather than flashing it back off.
+        toast.success("Board deleted");
+      } else {
         setDeleting(false);
         toast.error("Could not delete board.");
       }
-      // A redirect error means success -- the navigation is already
-      // underway, so leave `deleting` true rather than flashing it back off.
     }
   }
 

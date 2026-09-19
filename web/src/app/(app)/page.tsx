@@ -6,6 +6,7 @@ import { loadMoreSaves } from "@/lib/actions/gallery";
 import { GalleryGrid } from "@/components/gallery/GalleryGrid";
 import { InfiniteMasonryGrid } from "@/components/gallery/InfiniteMasonryGrid";
 import { GallerySearch } from "@/components/gallery/GallerySearch";
+import { PullToRefresh } from "@/components/fx/PullToRefresh";
 import { cn } from "@/lib/utils";
 import type { SaveWithUrl } from "@/lib/types";
 
@@ -64,13 +65,15 @@ export default async function GalleryPage({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Your gallery</h1>
-        {sortToggle}
+    <PullToRefresh>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Your gallery</h1>
+          {sortToggle}
+        </div>
+        <GallerySearch boards={boards ?? []}>{mainContent}</GallerySearch>
       </div>
-      <GallerySearch boards={boards ?? []}>{mainContent}</GallerySearch>
-    </div>
+    </PullToRefresh>
   );
 }
 

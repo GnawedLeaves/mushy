@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 import Link from "next/link";
 import { AmbientGradient } from "@/components/fx/AmbientGradient";
 import { MobileNav } from "@/components/nav/MobileNav";
+import { PageTransition } from "@/components/fx/PageTransition";
 
 export function AppShell({ nav, children }: { nav: ReactNode; children: ReactNode }) {
   return (
@@ -28,7 +29,15 @@ export function AppShell({ nav, children }: { nav: ReactNode; children: ReactNod
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">{nav}</div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:pb-6">{children}</main>
+      {/* pt-20 on mobile: MobileNav's floating notification bell
+          (`fixed right-4 top-4`, 44px tall) sits on top of whatever's at the
+          top of the page -- a plain `py-6` left just 24px of clearance, so a
+          page's own top-right controls (e.g. Gallery's sort toggle) ended up
+          partly hidden behind it. pb-28 does the same job at the bottom for
+          the floating nav pill. */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-20 pb-28 sm:pt-6 sm:pb-6">
+        <PageTransition>{children}</PageTransition>
+      </main>
 
       {/* Not in the main nav -- it's already packed (see the comment above)
           -- but every page should still lead somewhere to it, both for

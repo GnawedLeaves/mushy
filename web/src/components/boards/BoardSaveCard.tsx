@@ -57,7 +57,9 @@ export function BoardSaveCard({
           />
         </Link>
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
+        {/* Always visible on mobile -- see SaveCard's comment on the same
+            pattern for why opacity-0 + group-hover alone hid this on touch. */}
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <a
             href={save.source_url}
             target="_blank"
