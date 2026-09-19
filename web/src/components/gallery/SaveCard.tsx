@@ -102,10 +102,6 @@ export function SaveCard({
             alt={save.caption ?? "Saved design"}
             width={save.width}
             height={save.height}
-            videoProps={{
-              onMouseEnter: (e) => e.currentTarget.play(),
-              onMouseLeave: (e) => e.currentTarget.pause(),
-            }}
           />
         </Link>
 

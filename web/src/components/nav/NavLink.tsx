@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSectionPath } from "@/lib/useSectionPath";
 
 export function NavLink({
   href,
@@ -15,7 +15,7 @@ export function NavLink({
   className?: string;
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = useSectionPath();
   const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
   return (

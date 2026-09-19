@@ -9,7 +9,7 @@ export interface CommentWithMeta {
   id: string;
   body: string;
   created_at: string;
-  author: { username: string; display_name: string | null };
+  author: { username: string; display_name: string | null; avatarUrl: string | null };
   likes: number;
   dislikes: number;
   myReaction: ReactionType | null;
@@ -42,11 +42,13 @@ export async function listComments(saveId: string): Promise<CommentWithMeta[]> {
   // no direct FK from comments to profiles (both key off auth.users
   // independently), so PostgREST can't auto-embed -- fetch separately.
   const [{ data: authors }, { data: reactions }] = await Promise.all([
-    supabase.from("profiles").select("id, username, display_name").in("id", authorIds),
+    supabase.from("profiles").select("id, username, display_name, avatar_path").in("id", authorIds),
     supabase.from("comment_reactions").select("comment_id, user_id, reaction").in("comment_id", commentIds),
   ]);
 
   const authorById = new Map((authors ?? []).map((a) => [a.id, a]));
+  const avatarUrl = (path: string | null) =>
+    path ? supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl : null;
   const tally = new Map<string, { like: number; dislike: number; mine: ReactionType | null }>();
   for (const id of commentIds) tally.set(id, { like: 0, dislike: 0, mine: null });
   for (const r of reactions ?? []) {
@@ -64,7 +66,11 @@ export async function listComments(saveId: string): Promise<CommentWithMeta[]> {
       id: c.id,
       body: c.body,
       created_at: c.created_at,
-      author: { username: author?.username ?? "unknown", display_name: author?.display_name ?? null },
+      author: {
+        username: author?.username ?? "unknown",
+        display_name: author?.display_name ?? null,
+        avatarUrl: avatarUrl(author?.avatar_path ?? null),
+      },
       likes: bucket.like,
       dislikes: bucket.dislike,
       myReaction: bucket.mine,
@@ -73,7 +79,10 @@ export async function listComments(saveId: string): Promise<CommentWithMeta[]> {
   });
 }
 
-export async function addComment(saveId: string, body: string): Promise<{ error: string | null }> {
+export async function addComment(
+  saveId: string,
+  body: string
+): Promise<{ error: string | null; id?: string; createdAt?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -83,11 +92,20 @@ export async function addComment(saveId: string, body: string): Promise<{ error:
   const trimmed = body.trim().slice(0, COMMENT_MAX);
   if (!trimmed) return { error: "Comment can't be empty." };
 
-  const { error } = await supabase.from("comments").insert({ save_id: saveId, user_id: user.id, body: trimmed });
-  if (error) return { error: error.message };
+  // Returning the real row (rather than just a success signal) lets the
+  // caller use the actual uuid for its optimistic entry -- a client-made-up
+  // placeholder id previously got passed straight to deleteComment if the
+  // user deleted before the next revalidation, which Postgres rejected with
+  // "invalid input syntax for type uuid" since it was never a real row id.
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({ save_id: saveId, user_id: user.id, body: trimmed })
+    .select("id, created_at")
+    .single();
+  if (error || !data) return { error: error?.message ?? "Could not post comment." };
 
   revalidatePath(`/s/${saveId}`);
-  return { error: null };
+  return { error: null, id: data.id, createdAt: data.created_at };
 }
 
 // No updateComment -- "no editing allowed" is enforced both here (the

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Images, Compass, LayoutGrid, Search, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UserSearch } from "@/components/search/UserSearch";
 import { cn } from "@/lib/utils";
+import { useSectionPath } from "@/lib/useSectionPath";
 
 const TABS = [
   { href: "/", label: "Gallery", icon: Images },
@@ -17,7 +17,7 @@ const TABS = [
 // Floating bottom pill, mobile only (see AppShell -- hidden at the `sm`
 // breakpoint and up, where the regular header nav takes over instead).
 export function MobileNav() {
-  const pathname = usePathname();
+  const pathname = useSectionPath();
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -27,7 +27,7 @@ export function MobileNav() {
         style={{ left: "50%", transform: "translateX(-50%)" }}
       >
         {TABS.map((tab) => {
-          const active = pathname === tab.href;
+          const active = tab.href === "/" ? pathname === "/" : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           const Icon = tab.icon;
           return (
             <Link

@@ -30,12 +30,19 @@ export default async function SaveDetailPage({
 
   const isOwner = viewer?.id === save.owner_id;
 
-  const [{ data: owner }, mediaUrl, reactionSummary, comments] = await Promise.all([
+  const [{ data: owner }, mediaUrl, reactionSummary, comments, { data: viewerProfile }] = await Promise.all([
     supabase.from("profiles").select("username, display_name").eq("id", save.owner_id).maybeSingle(),
     getSignedMediaUrl(save.storage_path),
     getSaveReactionSummary(save.id),
     listComments(save.id),
+    viewer
+      ? supabase.from("profiles").select("username, display_name, avatar_path").eq("id", viewer.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
+
+  const viewerAvatarUrl = viewerProfile?.avatar_path
+    ? supabase.storage.from("avatars").getPublicUrl(viewerProfile.avatar_path).data.publicUrl
+    : null;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -101,7 +108,14 @@ export default async function SaveDetailPage({
       </div>
 
       <div className="rounded-2xl border bg-card p-5 shadow-sm">
-        <CommentSection saveId={save.id} initialComments={comments} canComment={!!viewer} />
+        <CommentSection
+          saveId={save.id}
+          initialComments={comments}
+          canComment={!!viewer}
+          viewerDisplayName={viewerProfile?.display_name ?? null}
+          viewerUsername={viewerProfile?.username ?? null}
+          viewerAvatarUrl={viewerAvatarUrl}
+        />
       </div>
     </div>
   );

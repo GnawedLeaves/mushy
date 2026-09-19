@@ -60,10 +60,10 @@ function showOnPageToast(ok: boolean, message: string) {
 }
 
 async function handleSave(mediaUrl: string, sourceUrl: string, sourceTitle?: string, tabId?: number) {
+  const mediaType = mediaTypeFromUrl(mediaUrl);
   const payload: SavePayload = { mediaUrl, sourceUrl, sourceTitle };
   const result = await saveMedia(payload);
 
-  const mediaType = mediaTypeFromUrl(mediaUrl);
   const message = result.ok ? `${mediaType} saved to Mushy Six` : `Could not save: ${result.error}`;
 
   chrome.notifications.create({

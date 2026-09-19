@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { signInWithPassword } from "@/lib/actions/auth";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { GradientBackground } from "@/components/fx/GradientBackground";
 import { TextPressure } from "@/components/fx/TextPressure";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { signInWithPassword } from "@/lib/actions/auth";
+import Link from "next/link";
 
 export default async function LoginPage({
   searchParams,

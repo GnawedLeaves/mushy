@@ -37,6 +37,7 @@ export function MediaThumb({
         src={mediaUrl}
         className={className ?? "w-full"}
         style={width && height ? { aspectRatio: `${width} / ${height}` } : undefined}
+        autoPlay
         muted
         loop
         playsInline

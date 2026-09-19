@@ -86,6 +86,8 @@ interface SavePayload {
 }
 ```
 
+The route responds as soon as the save itself succeeds -- it doesn't wait on AI tagging. If `GEMINI_API_KEY` is set on the server, a `next/server` `after()` callback tags the save's aesthetic (y2k, minimalist, etc.) in the background and writes it to `saves.tags` a moment later; the extension never sees or waits on this. Tags power Discover's tag search and are never shown in the UI directly.
+
 Defined in `extension/src/lib/types.ts` and `web/src/app/api/extension/save/route.ts`.
 
 ## Notes

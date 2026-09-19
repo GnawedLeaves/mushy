@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { verifyExtensionToken } from "@/lib/auth/verifyExtensionToken";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchAndValidateMedia, MediaFetchError } from "@/lib/extension/mediaFetch";
+import { generateAestheticTags } from "@/lib/ai/aestheticTags";
 import { positionAtEnd } from "@/lib/reorder";
 import { withCors, CORS_HEADERS } from "@/lib/extension/cors";
 
@@ -93,6 +94,18 @@ export async function POST(request: Request) {
     await admin.storage.from("media").remove([storagePath]);
     return withCors(NextResponse.json({ error: insertError.message }, { status: 500 }));
   }
+
+  // Tagging happens after the response is already on its way back to the
+  // extension -- the save itself doesn't wait on a Gemini round-trip. media
+  // is still in memory from the fetch above, so this doesn't re-download
+  // anything. Best-effort: on any failure (no key, timeout, bad response)
+  // generateAestheticTags resolves to [], and a save just stays untagged.
+  after(async () => {
+    const tags = await generateAestheticTags(media.buffer, media.mimeType);
+    if (tags.length > 0) {
+      await admin.from("saves").update({ tags }).eq("id", saveId);
+    }
+  });
 
   return withCors(NextResponse.json({ id: saveId }, { status: 201 }));
 }

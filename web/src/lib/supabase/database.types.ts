@@ -84,6 +84,7 @@ export interface Database {
           caption: string | null;
           is_private: boolean;
           position: number;
+          tags: string[];
           created_at: string;
           updated_at: string;
         };
@@ -101,11 +102,13 @@ export interface Database {
           caption?: string | null;
           is_private?: boolean;
           position: number;
+          tags?: string[];
         };
         Update: Partial<{
           caption: string | null;
           is_private: boolean;
           position: number;
+          tags: string[];
         }>;
         Relationships: [];
       };

@@ -55,6 +55,17 @@ export function UserSearch({ onNavigate, autoFocus }: { onNavigate?: () => void;
 
   const showDropdown = query.trim().length >= 2;
 
+  function handleSelect() {
+    // Clearing the query (not just calling onNavigate) is what actually
+    // closes the dropdown -- it stays visible purely based on query length,
+    // and the layout this lives in persists across route changes, so
+    // without this the results list was still sitting open after the click
+    // navigated away.
+    setQuery("");
+    setResults(null);
+    onNavigate?.();
+  }
+
   return (
     <div className="relative w-full">
       <div className="relative">
@@ -90,7 +101,7 @@ export function UserSearch({ onNavigate, autoFocus }: { onNavigate?: () => void;
               <Link
                 key={profile.username}
                 href={`/u/${profile.username}`}
-                onClick={onNavigate}
+                onClick={handleSelect}
                 className="flex items-center gap-2 rounded-md p-2 text-sm hover:bg-muted"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">

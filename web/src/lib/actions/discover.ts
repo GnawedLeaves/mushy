@@ -74,6 +74,49 @@ export async function loadMoreDiscoverSaves(cursor: DiscoverCursor | null): Prom
   return { saves: discoverSaves, nextCursor };
 }
 
+// Tags are AI-generated at save time (see lib/ai/aestheticTags.ts) and never
+// shown in the UI -- this is the only place they're read, as a hidden filter
+// over the same "not mine" visibility rule loadMoreDiscoverSaves uses (RLS
+// still gates which rows are visible at all; this just narrows further).
+export async function searchSavesByTag(rawTag: string): Promise<DiscoverSave[]> {
+  const tag = rawTag.trim().toLowerCase();
+  if (!tag) return [];
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: saves } = await supabase
+    .from("saves")
+    .select("*")
+    .neq("owner_id", user.id)
+    .contains("tags", [tag])
+    .order("created_at", { ascending: false })
+    .limit(60);
+
+  const rows = saves ?? [];
+  if (rows.length === 0) return [];
+
+  const ownerIds = [...new Set(rows.map((s) => s.owner_id))];
+  const [{ data: profiles }, urlMap] = await Promise.all([
+    supabase.from("profiles").select("id, username, display_name").in("id", ownerIds),
+    getSignedMediaUrls(rows.map((s) => s.storage_path)),
+  ]);
+
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  return rows.map((s) => ({
+    ...s,
+    mediaUrl: urlMap[s.storage_path] ?? null,
+    owner: {
+      username: profileById.get(s.owner_id)?.username ?? "unknown",
+      display_name: profileById.get(s.owner_id)?.display_name ?? null,
+    },
+  }));
+}
+
 // "Repin": copies someone else's public save into the caller's own gallery.
 // board_saves rows can only reference a save the caller owns (RLS), so
 // discovering something you don't own means making your own copy of it --
@@ -127,6 +170,7 @@ export async function repinSave(sourceSaveId: string): Promise<{ error: string |
     source_url: source.source_url,
     source_title: source.source_title,
     position: positionAtEnd(maxRow?.position ?? null),
+    tags: source.tags,
   });
 
   if (insertError) {
